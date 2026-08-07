@@ -4,23 +4,23 @@
 
 ### Approach: Boyer-Moore Voting Algorithm
 
-The majority element appears **more than ⌊n / 2⌋ times** in the array.
+The majority element appears **more than ⌊n / 2⌋ times**, so it can never be completely canceled out by the other elements.
 
-The Boyer-Moore Voting Algorithm works by maintaining:
+We maintain two variables:
 
-- **candidate** → current possible majority element.
-- **count** → frequency balance of the candidate.
+- `ans` → stores the current majority candidate.
+- `freq` → stores the vote count of the current candidate.
 
 ### Algorithm
 
-1. Initialize `candidate` and `count = 0`.
+1. Initialize `freq = 0` and `ans = 0`.
 2. Traverse the array:
-   - If `count == 0`, set the current element as the new `candidate`.
-   - If the current element equals the `candidate`, increment `count`.
-   - Otherwise, decrement `count`.
-3. After the traversal, the `candidate` is the majority element.
+   - If `freq == 0`, make the current element the new candidate (`ans = nums[i]`).
+   - If `nums[i] == ans`, increment `freq`.
+   - Otherwise, decrement `freq`.
+3. After the traversal, `ans` contains the majority element.
 
----
+
 
 ## Dry Run
 
@@ -30,17 +30,17 @@ The Boyer-Moore Voting Algorithm works by maintaining:
 nums = [2, 2, 1, 1, 1, 2, 2]
 ```
 
-| Element | Candidate | Count |
-|---------|-----------|------:|
-| 2 | 2 | 1 |
-| 2 | 2 | 2 |
-| 1 | 2 | 1 |
-| 1 | 2 | 0 |
-| 1 | 1 | 1 |
-| 2 | 1 | 0 |
-| 2 | 2 | 1 |
+| i | nums[i] | ans | freq |
+|---|---------|-----|------|
+| 0 | 2 | 2 | 1 |
+| 1 | 2 | 2 | 2 |
+| 2 | 1 | 2 | 1 |
+| 3 | 1 | 2 | 0 |
+| 4 | 1 | 1 | 1 |
+| 5 | 2 | 1 | 0 |
+| 6 | 2 | 2 | 1 |
 
-**Final Answer**
+**Output**
 
 ```text
 2
@@ -52,8 +52,8 @@ nums = [2, 2, 1, 1, 1, 2, 2]
 
 ### Time Complexity: **O(n)**
 
-**Reason:** We traverse the array exactly once.
+**Reason:** We traverse the array only once.
 
 ### Space Complexity: **O(1)**
 
-**Reason:** We only use two variables (`candidate` and `count`), regardless of the input size.
+**Reason:** Only two extra variables (`ans` and `freq`) are used.
