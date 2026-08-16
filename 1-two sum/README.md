@@ -37,40 +37,40 @@ Because:
 
 ## Solution
 
-### Approach: Two Pointers
+### Optimal Approach: HashMap
 
-The **two-pointer approach requires the array to be sorted**.
+We use a `HashMap` to store each number along with its index.
 
-Since LeetCode asks for the **original indices**, we first store each number together with its original index.
+Instead of searching for two numbers whose sum is equal to `target`, we calculate the number we **need**.
 
-Then sort the elements based on their values.
-
-We use two pointers:
+For every element:
 
 ```text
-left  → first element
-right → last element
+needed = target - current number
 ```
 
-For every step:
+Then check whether `needed` already exists in the HashMap.
 
-- If `nums[left] + nums[right] < target` → move `left++`
-- If `nums[left] + nums[right] > target` → move `right--`
-- If the sum equals `target` → return their original indices.
+### Steps
 
-### Why does this work?
-
-Because the array is sorted:
+1. Create an empty HashMap.
+2. Traverse the array from left to right.
+3. Calculate:
 
 ```text
-Smallest ← → Largest
+needed = target - nums[i]
 ```
 
-If the sum is too small, we need a **larger number**, so move `left`.
-
-If the sum is too large, we need a **smaller number**, so move `right`.
+4. Check if `needed` exists in the HashMap.
+5. If it exists:
+   - We found the required pair.
+   - Return the stored index and current index.
+6. If it doesn't exist:
+   - Store the current number and its index in the HashMap.
+7. Continue until the pair is found.
 
 ---
+
 
 
 ## Dry Run
@@ -82,86 +82,77 @@ nums = [2, 7, 11, 15]
 target = 9
 ```
 
-Store values with their original indices:
+Initially:
 
 ```text
-[2, 0]
-[7, 1]
-[11, 2]
-[15, 3]
+map = {}
 ```
-
-After sorting:
-
-```text
-Value:  2   7   11   15
-Index:  0   1    2    3
-        ↑            ↑
-       left         right
-```
-
----
 
 ### Step 1
 
+Current number:
+
 ```text
-2 + 15 = 17
+nums[0] = 2
 ```
 
-`17 > 9`, so we need a smaller value.
-
-Move:
+Calculate:
 
 ```text
-right--
+needed = 9 - 2
+       = 7
 ```
 
-Now:
+Check:
 
 ```text
-Value:  2   7   11   15
-        ↑        ↑
-       left     right
+7 exists in map?
+```
+
+No.
+
+Store `2` and its index:
+
+```text
+map = {
+    2 → 0
+}
 ```
 
 ---
 
 ### Step 2
 
+Current number:
+
 ```text
-2 + 11 = 13
+nums[1] = 7
 ```
 
-`13 > 9`.
-
-Move:
+Calculate:
 
 ```text
-right--
+needed = 9 - 7
+       = 2
 ```
 
-Now:
+Check:
 
 ```text
-Value:  2   7   11   15
-        ↑    ↑
-       left right
+2 exists in map?
 ```
 
----
+Yes!
 
-### Step 3
+The HashMap contains:
 
 ```text
-2 + 7 = 9
+2 → 0
 ```
 
-We found the target.
-
-Original indices:
+Current index is:
 
 ```text
-2 → index 0
 7 → index 1
 ```
 
@@ -171,53 +162,78 @@ Therefore:
 [0, 1]
 ```
 
+Because:
+
+```text
+2 + 7 = 9
+```
+
+---
+
+## Dry Run Table
+
+| i | nums[i] | Needed | HashMap | Result |
+|---|---:|---:|---|---|
+| 0 | 2 | 7 | `{}` | Store `2 → 0` |
+| 1 | 7 | 2 | `{2 → 0}` | Found `2` |
+
+### Final Answer
+
+```text
+[0, 1]
+```
+
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n log n)
+### Time Complexity: O(n)
 
-**Reason:** We sort the array in `O(n log n)` and then use two pointers in `O(n)`.
-
-Overall:
-
-```text
-O(n log n)
-```
+**Reason:** We traverse the array only once, and HashMap lookup takes `O(1)` average time.
 
 ### Space Complexity: O(n)
 
-**Reason:** We create an array storing each value along with its original index.
+**Reason:** In the worst case, we store all elements in the HashMap.
 
 ---
 
 ## Key Takeaway
 
-The two-pointer pattern is:
+The main idea is:
 
 ```text
-          Sorted Array
-
-left →  2   7   11   15  ← right
-```
-
-```text
-sum < target
-    ↓
-left++
-
-sum > target
-    ↓
-right--
-
-sum == target
-    ↓
-Answer Found
+Current Number
+      ↓
+target - current
+      ↓
+   Needed Number
+      ↓
+Check HashMap
+   ↙        ↘
+Found      Not Found
+  ↓            ↓
+Return      Store Current
+indices       number
 ```
 
 ### Remember
 
-> **Small sum → move left forward.**  
-> **Large sum → move right backward.**
+> **Don't search for the second number. Calculate what number you need and check whether you have already seen it.**
 
-For LeetCode 1, the **HashMap solution is more optimal** at `O(n)` time, but the two-pointer approach is useful for learning the two-pointer technique.
+```text
+needed = target - nums[i]
+```
+
+For example:
+
+```text
+target = 9
+current = 7
+
+needed = 9 - 7
+       = 2
+```
+
+If `2` is already in the HashMap, we have found the answer.
+
+**HashMap → O(n) Time | O(n) Space**
