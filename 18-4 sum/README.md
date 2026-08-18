@@ -1,45 +1,38 @@
-# 3Sum
+# 4Sum
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[4Sum](https://leetcode.com/problems/4sum/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an integer array `nums` and an integer `target`, return all the unique quadruplets:
 
 ```text
-nums[i] + nums[j] + nums[k] = 0
+nums[a] + nums[b] + nums[c] + nums[d] = target
 ```
 
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+The indices must be different, and the answer must not contain duplicate quadruplets.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,0,-1,0,-2,2]
+target = 0
 ```
 
 **Output:**
 
 ```text
 [
-    [-1, -1, 2],
-    [-1, 0, 1]
+    [-2,-1,1,2],
+    [-2,0,0,2],
+    [-1,0,0,1]
 ]
-```
-
-Because:
-
-```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
 ```
 
 ---
@@ -48,172 +41,140 @@ Because:
 
 ### Optimal Approach: Sorting + Two Pointers
 
-First, sort the array.
+The 4Sum problem is an extension of the 3Sum approach.
 
 ```text
-[-1, 0, 1, 2, -1, -4]
+2Sum → Two Pointers
+3Sum → Fix 1 element + Two Pointers
+4Sum → Fix 2 elements + Two Pointers
+```
+
+First, sort the array:
+
+```text
+[1,0,-1,0,-2,2]
 ```
 
 becomes:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+[-2,-1,0,0,1,2]
 ```
 
-Then use three positions:
+Then:
 
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
+1. Fix the first element using `i`.
+2. Fix the second element using `j`.
+3. Use two pointers:
+   ```text
+   left = j + 1
+   right = n - 1
+   ```
+4. Calculate:
+   ```text
+   sum = nums[i] + nums[j] + nums[left] + nums[right]
+   ```
+5. If `sum < target`, move `left` forward.
+6. If `sum > target`, move `right` backward.
+7. If `sum == target`, store the quadruplet.
+8. Skip duplicate values to avoid duplicate quadruplets.
 
-For every fixed `nums[i]`, calculate:
+### Why Two Pointers Work
+
+Because the array is sorted:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
-```
-
-### Three Cases
-
-If:
-
-```text
-sum < 0
-```
-
-The sum is too small, so increase `left`:
-
-```text
+sum < target
+      ↓
+Need a larger value
+      ↓
 left++
-```
 
-If:
-
-```text
-sum > 0
-```
-
-The sum is too large, so decrease `right`:
-
-```text
+sum > target
+      ↓
+Need a smaller value
+      ↓
 right--
 ```
 
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
 
 
+---
 
 ## Dry Run
 
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,0,-1,0,-2,2]
+target = 0
 ```
 
 ### Step 1: Sort
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+[-2,-1,0,0,1,2]
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### Step 2: Fix `i = -2` and `j = -1`
 
 ```text
-i = -4
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--4 + (-1) + 2 = -3
+-2 + (-1) + 0 + 2 = -1
 ```
 
 Since:
 
 ```text
--3 < 0
+-1 < 0
 ```
 
 Move `left` forward.
 
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
+Eventually:
 
 ```text
-i = -1
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
+-2 + (-1) + 1 + 2 = 0
 ```
 
 Found:
 
 ```text
-[-1, -1, 2]
+[-2,-1,1,2]
 ```
 
-Move both pointers.
+---
 
-Now:
+### Step 3: Fix `i = -2` and `j = 0`
+
+We get:
 
 ```text
--1 + 0 + 1 = 0
+-2 + 0 + 0 + 2 = 0
 ```
 
 Found:
 
 ```text
-[-1, 0, 1]
+[-2,0,0,2]
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
+### Step 4: Fix `i = -1`
 
-There are two `-1`s:
+Using:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
+-1 + 0 + 0 + 1 = 0
 ```
 
-If we fix the second `-1` again, we could generate duplicate triplets.
+Found:
 
-So:
-
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+[-1,0,0,1]
 ```
-
-skips it.
 
 ---
 
@@ -221,8 +182,9 @@ skips it.
 
 ```text
 [
-    [-1, -1, 2],
-    [-1, 0, 1]
+    [-2,-1,1,2],
+    [-2,0,0,2],
+    [-1,0,0,1]
 ]
 ```
 
@@ -230,15 +192,15 @@ skips it.
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n³)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
+We have two loops to fix two elements and then use two pointers.
 
 ```text
-O(n²)
+O(n³)
 ```
+
+Sorting takes `O(n log n)`, which is smaller than `O(n³)`.
 
 ### Space Complexity: O(1)
 
@@ -248,26 +210,42 @@ Ignoring the output, we use only constant extra space.
 
 ## Key Takeaway
 
-The main pattern is:
+Remember the progression:
+
+```text
+2Sum
+  ↓
+Two Pointers
+
+3Sum
+  ↓
+Fix 1 element + Two Pointers
+
+4Sum
+  ↓
+Fix 2 elements + Two Pointers
+```
+
+The main pattern:
 
 ```text
 Sort
   ↓
-Fix one element
+Fix i
   ↓
-Use Two Pointers
+Fix j
   ↓
-Calculate 3 numbers
+left + right
+  ↓
+Compare sum with target
 ```
-
-Remember:
 
 ```text
-sum < 0  → left++
+sum < target  → left++
 
-sum > 0  → right--
+sum > target  → right--
 
-sum == 0 → store triplet
+sum == target → Store quadruplet
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+**Sorting + Two Fixed Elements + Two Pointers = O(n³)**
