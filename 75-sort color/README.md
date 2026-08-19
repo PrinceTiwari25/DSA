@@ -1,118 +1,110 @@
-# 3Sum
+# Sort Colors
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[Sort Colors](https://leetcode.com/problems/sort-colors/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an array `nums` containing only `0`, `1`, and `2`, sort the array **in-place** so that all `0`s come first, followed by all `1`s, and then all `2`s.
 
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+You must solve the problem without using the built-in sorting function.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [2, 0, 2, 1, 1, 0]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
-```
-
-Because:
-
-```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+[0, 0, 1, 1, 2, 2]
 ```
 
 ---
 
 ## Solution
 
-### Optimal Approach: Sorting + Two Pointers
+### Optimal Approach: Dutch National Flag Algorithm
 
-First, sort the array.
-
-```text
-[-1, 0, 1, 2, -1, -4]
-```
-
-becomes:
+We use **three pointers**:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+low
+mid
+high
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+They divide the array into four sections:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+0s        1s          Unknown          2s
+[0 ... low-1] [low ... mid-1] [mid ... high] [high+1 ...]
 ```
 
-### Three Cases
-
-If:
+Initially:
 
 ```text
-sum < 0
+low = 0
+mid = 0
+high = nums.length - 1
 ```
 
-The sum is too small, so increase `left`:
+Now check `nums[mid]`.
+
+### Case 1: `nums[mid] == 0`
+
+`0` belongs at the beginning.
+
+Swap:
 
 ```text
-left++
+nums[low] ↔ nums[mid]
 ```
 
-If:
+Then:
 
 ```text
-sum > 0
+low++
+mid++
 ```
 
-The sum is too large, so decrease `right`:
+---
+
+### Case 2: `nums[mid] == 1`
+
+`1` belongs in the middle.
+
+So simply:
 
 ```text
-right--
+mid++
 ```
 
-If:
+---
+
+### Case 3: `nums[mid] == 2`
+
+`2` belongs at the end.
+
+Swap:
 
 ```text
-sum == 0
+nums[mid] ↔ nums[high]
 ```
 
-We found a valid triplet.
+Then:
 
-Then move both pointers and skip duplicate values.
+```text
+high--
+```
 
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
+Do **not** increment `mid` because the element coming from `high` has not been checked yet.
 
 
 
@@ -121,153 +113,163 @@ We skip duplicate `i`, `left`, and `right` values so that the result contains on
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+[2, 0, 2, 1, 1, 0]
 ```
 
-### Step 1: Sort
+Initially:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+low = 0
+mid = 0
+high = 5
+```
+
+### Step 1
+
+`nums[mid] = 2`
+
+Swap with `high`:
+
+```text
+[0, 0, 2, 1, 1, 2]
+```
+
+```text
+high--
+```
+
+`mid` stays at `0`.
+
+---
+
+### Step 2
+
+`nums[mid] = 0`
+
+Swap with `low`:
+
+```text
+[0, 0, 2, 1, 1, 2]
+```
+
+Then:
+
+```text
+low++
+mid++
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### Step 3
+
+`nums[mid] = 0`
+
+Move it to the `0` section:
 
 ```text
-i = -4
-left = -1
-right = 2
+[0, 0, 2, 1, 1, 2]
 ```
 
-Calculate:
+Then:
 
 ```text
--4 + (-1) + 2 = -3
+low++
+mid++
 ```
-
-Since:
-
-```text
--3 < 0
-```
-
-Move `left` forward.
-
-No valid triplet is found with `-4`.
 
 ---
 
-### Step 3: Fix `-1`
+### Step 4
+
+`nums[mid] = 2`
+
+Swap with `high`:
 
 ```text
-i = -1
-left = -1
-right = 2
+[0, 0, 1, 1, 2, 2]
 ```
 
-Calculate:
+Then:
 
 ```text
--1 + (-1) + 2 = 0
+high--
 ```
 
-Found:
+---
+
+### Step 5
+
+`nums[mid] = 1`
+
+`1` is already in the correct section:
 
 ```text
-[-1, -1, 2]
+mid++
 ```
 
-Move both pointers.
+---
+
+### Step 6
+
+`nums[mid] = 1`
+
+Again:
+
+```text
+mid++
+```
 
 Now:
 
 ```text
--1 + 0 + 1 = 0
+mid > high
 ```
 
-Found:
+Stop.
+
+### Final Answer
 
 ```text
-[-1, 0, 1]
-```
-
----
-
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
-
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
-
-So:
-
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
-```
-
-skips it.
-
----
-
-## Final Answer
-
-```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+[0, 0, 1, 1, 2, 2]
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
-
-```text
-O(n²)
-```
+**Reason:** We traverse the array only once.
 
 ### Space Complexity: O(1)
 
-Ignoring the output, we use only constant extra space.
+**Reason:** We sort the array in-place using only three pointers.
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+Remember these three rules:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+0 → swap with low → low++, mid++
+
+1 → mid++
+
+2 → swap with high → high--
 ```
 
-Remember:
+The most important point:
+
+> When `nums[mid] == 2`, **do not increment `mid`**, because the new element swapped from `high` still needs to be checked.
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+Dutch National Flag Algorithm
+        ↓
+Three Pointers
+        ↓
+One Pass
+        ↓
+O(n) Time + O(1) Space
 ```
-
-And always **skip duplicates** to avoid duplicate triplets.
