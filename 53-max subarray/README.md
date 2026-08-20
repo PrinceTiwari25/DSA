@@ -1,118 +1,90 @@
-# 3Sum
+# Maximum Subarray
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[Maximum Subarray](https://leetcode.com/problems/maximum-subarray/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an integer array `nums`, find the subarray with the largest sum and return its sum.
 
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+A **subarray** is a contiguous part of the array containing at least one element.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [-2,1,-3,4,-1,2,1,-5,4]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+6
 ```
 
-Because:
+The subarray with the maximum sum is:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+[4,-1,2,1]
+```
+
+Sum:
+
+```text
+4 + (-1) + 2 + 1 = 6
 ```
 
 ---
 
 ## Solution
 
-### Optimal Approach: Sorting + Two Pointers
+### Optimal Approach: Kadane's Algorithm
 
-First, sort the array.
-
-```text
-[-1, 0, 1, 2, -1, -4]
-```
-
-becomes:
+We use two variables:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+currentSum
+maxSum
 ```
 
-Then use three positions:
+`currentSum` stores the **maximum sum of a subarray ending at the current position**.
 
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+For every element, we have two choices:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+1. Start a new subarray from nums[i]
+2. Continue the previous subarray
 ```
 
-### Three Cases
-
-If:
+So we calculate:
 
 ```text
-sum < 0
+currentSum = max(nums[i], currentSum + nums[i])
 ```
 
-The sum is too small, so increase `left`:
+Then update the overall maximum:
 
 ```text
-left++
+maxSum = max(maxSum, currentSum)
 ```
 
-If:
+### Key Idea
+
+If the previous `currentSum` is negative, carrying it forward will only decrease the sum.
+
+So we start a new subarray.
 
 ```text
-sum > 0
+Negative previous sum
+        ↓
+Discard it
+        ↓
+Start from current element
 ```
-
-The sum is too large, so decrease `right`:
-
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
 
 
 
@@ -121,153 +93,117 @@ We skip duplicate `i`, `left`, and `right` values so that the result contains on
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [-2,1,-3,4,-1,2,1,-5,4]
 ```
 
-### Step 1: Sort
+Initially:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+currentSum = -2
+maxSum = -2
 ```
 
----
+| Element | `currentSum` | `maxSum` |
+|---:|---:|---:|
+| -2 | -2 | -2 |
+| 1 | 1 | 1 |
+| -3 | -2 | 1 |
+| 4 | 4 | 4 |
+| -1 | 3 | 4 |
+| 2 | 5 | 5 |
+| 1 | 6 | 6 |
+| -5 | 1 | 6 |
+| 4 | 5 | 6 |
 
-### Step 2: Fix `-4`
+### Important Steps
+
+When we reach `4`:
 
 ```text
-i = -4
-left = -1
-right = 2
+currentSum = -2 + 4 = 2
 ```
 
-Calculate:
+But starting fresh gives:
 
 ```text
--4 + (-1) + 2 = -3
+4
 ```
-
-Since:
-
-```text
--3 < 0
-```
-
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
-
-```text
-i = -1
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
-```
-
----
-
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
-
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+currentSum = 4
 ```
 
-skips it.
+Later:
+
+```text
+4 + (-1) + 2 + 1 = 6
+```
+
+Therefore:
+
+```text
+maxSum = 6
+```
 
 ---
 
 ## Final Answer
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+6
+```
+
+Maximum subarray:
+
+```text
+[4,-1,2,1]
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
-
-```text
-O(n²)
-```
+**Reason:** We traverse the array only once.
 
 ### Space Complexity: O(1)
 
-Ignoring the output, we use only constant extra space.
+**Reason:** We use only two variables, `currentSum` and `maxSum`.
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+Kadane's Algorithm follows this simple rule:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+currentSum =
+max(
+    current element,
+    previous currentSum + current element
+)
 ```
 
-Remember:
+Then:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+maxSum = max(maxSum, currentSum)
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+### Remember
+
+> **If the previous sum helps, continue. If it hurts, start fresh.**
+
+```text
+Kadane's Algorithm
+       ↓
+Track current best sum
+       ↓
+Track overall best sum
+       ↓
+O(n) Time
+O(1) Space
+```
