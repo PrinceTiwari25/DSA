@@ -1,118 +1,128 @@
-# 3Sum
+# Next Permutation
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[Next Permutation](https://leetcode.com/problems/next-permutation/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an array of integers `nums`, rearrange the numbers into the **next lexicographically greater permutation** of numbers.
 
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
+If such an arrangement is not possible, rearrange the numbers into the **lowest possible order**, which means sorting them in ascending order.
 
-The indices `i`, `j`, and `k` must be different.
+The rearrangement must be done **in-place** with constant extra memory.
 
-The solution must not contain duplicate triplets.
-
-### Example
+### Example 1
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,2,3]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+[1,3,2]
 ```
 
-Because:
+### Example 2
+
+**Input:**
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+nums = [3,2,1]
+```
+
+**Output:**
+
+```text
+[1,2,3]
 ```
 
 ---
 
 ## Solution
 
-### Optimal Approach: Sorting + Two Pointers
+### Optimal Approach: Find Pivot + Swap + Reverse
 
-First, sort the array.
+The next permutation can be found in **three steps**.
 
-```text
-[-1, 0, 1, 2, -1, -4]
-```
+### Step 1: Find the Pivot
 
-becomes:
+Start from the right side and find the first index `i` such that:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+nums[i] < nums[i + 1]
 ```
 
-Then use three positions:
+This is the point where we can make the permutation slightly larger.
 
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+Example:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+[1, 2, 3]
+    ↑  ↑
+    i i+1
 ```
 
-### Three Cases
-
-If:
+Here:
 
 ```text
-sum < 0
+2 < 3
 ```
 
-The sum is too small, so increase `left`:
+So:
 
 ```text
-left++
+pivot = 1
 ```
 
-If:
+---
+
+### Step 2: Find the Next Larger Element
+
+Starting from the right, find the first element greater than the pivot.
+
+For:
 
 ```text
-sum > 0
+[1,2,3]
 ```
 
-The sum is too large, so decrease `right`:
+Pivot:
 
 ```text
-right--
+2
 ```
 
-If:
+The next larger element is:
 
 ```text
-sum == 0
+3
 ```
 
-We found a valid triplet.
+Swap them:
 
-Then move both pointers and skip duplicate values.
+```text
+[1,3,2]
+```
 
-### Duplicate Handling
+---
 
-Since the array is sorted, duplicate values are next to each other.
+### Step 3: Reverse the Suffix
 
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
+Reverse everything after the pivot.
+
+Why?
+
+The part after the pivot is in **descending order**.
+
+We need the smallest possible arrangement after increasing the pivot.
+
+So we reverse it to make it ascending.
 
 
 
@@ -121,153 +131,170 @@ We skip duplicate `i`, `left`, and `right` values so that the result contains on
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,2,3]
 ```
 
-### Step 1: Sort
+### Step 1: Find Pivot
+
+Start from the right:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+[1, 2, 3]
+   ↑  ↑
+   2  3
 ```
 
----
-
-### Step 2: Fix `-4`
+Check:
 
 ```text
-i = -4
-left = -1
-right = 2
+2 < 3
 ```
-
-Calculate:
-
-```text
--4 + (-1) + 2 = -3
-```
-
-Since:
-
-```text
--3 < 0
-```
-
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
-
-```text
-i = -1
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
-```
-
----
-
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
-
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+pivot = 1
 ```
-
-skips it.
 
 ---
 
-## Final Answer
+### Step 2: Find Next Greater Element
+
+Pivot value:
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+2
+```
+
+From the right:
+
+```text
+3 > 2
+```
+
+So choose `3`.
+
+Swap:
+
+```text
+[1,2,3]
+```
+
+becomes:
+
+```text
+[1,3,2]
+```
+
+---
+
+### Step 3: Reverse Suffix
+
+The suffix after pivot is:
+
+```text
+[2]
+```
+
+Only one element, so nothing changes.
+
+Final:
+
+```text
+[1,3,2]
+```
+
+---
+
+## Example 2
+
+### Input
+
+```text
+nums = [3,2,1]
+```
+
+Find pivot:
+
+```text
+3 > 2
+2 > 1
+```
+
+There is **no pivot**.
+
+This means the array is already the largest possible permutation:
+
+```text
+[3,2,1]
+```
+
+So we reverse the entire array:
+
+```text
+[1,2,3]
+```
+
+### Final Answer
+
+```text
+[1,2,3]
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
+**Reason:** We scan the array a few times, and each scan takes `O(n)`.
 
-Therefore:
+Overall:
 
 ```text
-O(n²)
+O(n)
 ```
 
 ### Space Complexity: O(1)
 
-Ignoring the output, we use only constant extra space.
+**Reason:** The array is modified in-place and only a few variables are used.
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+Remember the **3 steps**:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+1. Find Pivot
+       ↓
+2. Find Next Greater Element & Swap
+       ↓
+3. Reverse Suffix
 ```
 
-Remember:
+### Important Condition
+
+Find the pivot from the right:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+nums[i] < nums[i + 1]
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+Then find from the right:
+
+```text
+nums[j] > nums[i]
+```
+
+Finally:
+
+```text
+Reverse from i + 1 to end
+```
+
+
+
+**Next Permutation = Pivot + Swap + Reverse**
+
+**Time: O(n) | Space: O(1)**
