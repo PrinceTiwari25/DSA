@@ -1,118 +1,138 @@
-# 3Sum
+# Majority Element II
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[Majority Element II](https://leetcode.com/problems/majority-element-ii/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an integer array `nums` of size `n`, return all elements that appear **more than `n / 3` times**.
 
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+The answer can contain at most **two elements**.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [3,2,3]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+[3]
+```
+
+### Another Example
+
+**Input:**
+
+```text
+nums = [1,1,1,3,3,2,2,2]
+```
+
+**Output:**
+
+```text
+[1,2]
 ```
 
 Because:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+1 → 3 times
+2 → 3 times
+n / 3 = 8 / 3 = 2
 ```
+
+Both `1` and `2` occur more than `2` times.
 
 ---
 
-## Solution
+## Optimal Approach: Boyer-Moore Voting Algorithm
 
-### Optimal Approach: Sorting + Two Pointers
+For the normal **Majority Element** problem, we use one candidate.
 
-First, sort the array.
+Here, an element must appear more than `n / 3` times.
 
-```text
-[-1, 0, 1, 2, -1, -4]
-```
+There can be **at most two majority elements**.
 
-becomes:
+So we use:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+candidate1
+candidate2
+count1
+count2
 ```
 
-Then use three positions:
+### Why at most two?
 
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+If there were three different elements appearing more than `n / 3` times:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+> n/3 + > n/3 + > n/3
 ```
 
-### Three Cases
+Their total frequency would be greater than `n`, which is impossible.
 
-If:
+Therefore, we only need **two candidates**.
+
+---
+
+## Approach
+
+### Step 1: Find Two Possible Candidates
+
+Traverse the array.
+
+For every number:
 
 ```text
-sum < 0
+If it equals candidate1:
+    count1++
+
+Else if it equals candidate2:
+    count2++
+
+Else if count1 == 0:
+    candidate1 = number
+    count1 = 1
+
+Else if count2 == 0:
+    candidate2 = number
+    count2 = 1
+
+Else:
+    count1--
+    count2--
 ```
 
-The sum is too small, so increase `left`:
+The last case means:
+
+> We found a number different from both candidates, so cancel one occurrence of each candidate.
+
+---
+
+### Step 2: Verify the Candidates
+
+The voting process only gives us **possible candidates**.
+
+So we traverse the array again and count:
 
 ```text
-left++
+candidate1
+candidate2
 ```
 
-If:
+Then add a candidate to the answer only if:
 
 ```text
-sum > 0
+count > n / 3
 ```
-
-The sum is too large, so decrease `right`:
-
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
 
 
 
@@ -121,153 +141,190 @@ We skip duplicate `i`, `left`, and `right` values so that the result contains on
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,1,1,3,3,2,2,2]
 ```
 
-### Step 1: Sort
+Here:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+n = 8
+n / 3 = 2
 ```
 
----
+We need elements appearing **more than 2 times**.
 
-### Step 2: Fix `-4`
+Initially:
 
 ```text
-i = -4
-left = -1
-right = 2
+candidate1 = -
+candidate2 = -
+count1 = 0
+count2 = 0
 ```
 
-Calculate:
+### Process `1`
 
 ```text
--4 + (-1) + 2 = -3
+candidate1 = 1
+count1 = 1
 ```
 
-Since:
+### Process `1`
 
 ```text
--3 < 0
+count1 = 2
 ```
 
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
+### Process `1`
 
 ```text
-i = -1
-left = -1
-right = 2
+count1 = 3
 ```
 
-Calculate:
+### Process `3`
 
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
-```
-
----
-
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
-
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
+`3` is different from both candidates and `count2 = 0`.
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+candidate2 = 3
+count2 = 1
 ```
 
-skips it.
+### Process `3`
+
+```text
+count2 = 2
+```
+
+### Process `2`
+
+`2` is different from both candidates.
+
+So cancel one count from each:
+
+```text
+count1 = 2
+count2 = 1
+```
+
+### Process `2`
+
+Again:
+
+```text
+count1 = 1
+count2 = 0
+```
+
+### Process `2`
+
+Since `count2 == 0`:
+
+```text
+candidate2 = 2
+count2 = 1
+```
+
+Possible candidates are:
+
+```text
+candidate1 = 1
+candidate2 = 2
+```
 
 ---
 
-## Final Answer
+## Verification
+
+Count their actual frequencies.
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+1 → 3 times
+2 → 3 times
+```
+
+Required:
+
+```text
+n / 3 = 2
+```
+
+Both satisfy:
+
+```text
+3 > 2
+```
+
+Therefore:
+
+```text
+[1,2]
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
+We traverse the array twice:
+
+```text
+First pass → find candidates
+Second pass → verify candidates
+```
 
 Therefore:
 
 ```text
-O(n²)
+O(n)
 ```
 
 ### Space Complexity: O(1)
 
-Ignoring the output, we use only constant extra space.
+We use only:
+
+```text
+candidate1
+candidate2
+count1
+count2
+```
+
+The output list is not considered extra working space.
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+For **Majority Element II**:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+More than n/3
+       ↓
+At most 2 majority elements
+       ↓
+Use 2 candidates
+       ↓
+Boyer-Moore Voting
+       ↓
+Verify candidates
 ```
 
-Remember:
+### Remember
 
 ```text
-sum < 0  → left++
+Same candidate → increase count
 
-sum > 0  → right--
+Empty candidate → select new candidate
 
-sum == 0 → store triplet
+Different from both → decrease both counts
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+And always remember:
+
+> **Candidate selection is not enough — verify the candidates in a second pass.**
+
+**Boyer-Moore Voting → O(n) Time | O(1) Extra Space**
