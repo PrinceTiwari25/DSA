@@ -1,273 +1,272 @@
-# 3Sum
+# Set Mismatch
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[Set Mismatch](https://leetcode.com/problems/set-mismatch/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+You have a set of integers `1` to `n`.
 
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
+Due to an error:
 
-The indices `i`, `j`, and `k` must be different.
+- One number appears **twice**.
+- One number is **missing**.
 
-The solution must not contain duplicate triplets.
+Find the number that occurs twice and the number that is missing.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,2,2,4]
+```
+
+Here:
+
+```text
+Repeating Number = 2
+Missing Number = 3
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
-```
-
-Because:
-
-```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+[2,3]
 ```
 
 ---
 
 ## Solution
 
-### Optimal Approach: Sorting + Two Pointers
+### Optimal Approach: Cyclic Sort / Index Placement
 
-First, sort the array.
-
-```text
-[-1, 0, 1, 2, -1, -4]
-```
-
-becomes:
+Since the numbers are from:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+1 to n
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+each number `x` should ideally be placed at:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+index = x - 1
 ```
 
-### Three Cases
-
-If:
+For example:
 
 ```text
-sum < 0
+Number 1 → index 0
+Number 2 → index 1
+Number 3 → index 2
+Number 4 → index 3
 ```
 
-The sum is too small, so increase `left`:
+We rearrange the array so that every number tries to reach its correct index.
+
+### Steps
+
+1. Traverse the array.
+2. For every number `nums[i]`, calculate its correct index:
 
 ```text
-left++
+correctIndex = nums[i] - 1
 ```
 
-If:
+3. If the number is not at its correct position, swap it with the number at its correct position.
+4. If the correct position already contains the same number, we have found the duplicate.
+5. After rearranging, traverse the array again.
+6. If:
 
 ```text
-sum > 0
+nums[i] != i + 1
 ```
 
-The sum is too large, so decrease `right`:
-
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
+then:
+- `nums[i]` is the **repeating number**
+- `i + 1` is the **missing number**
 
 
+
+---
 
 ## Dry Run
 
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,2,2,4]
 ```
 
-### Step 1: Sort
+Correct positions should be:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+1 → index 0
+2 → index 1
+3 → index 2
+4 → index 3
+```
+
+Initially:
+
+```text
+[1,2,2,4]
+```
+
+### Step 1
+
+`1` is already at index `0`.
+
+```text
+[1,2,2,4]
+ ↑
+correct
+```
+
+Move forward.
+
+---
+
+### Step 2
+
+`2` is already at index `1`.
+
+```text
+[1,2,2,4]
+   ↑
+correct
+```
+
+Move forward.
+
+---
+
+### Step 3
+
+Current number:
+
+```text
+2
+```
+
+Its correct index is:
+
+```text
+2 - 1 = 1
+```
+
+But index `1` already contains `2`.
+
+So we cannot place another `2` there.
+
+This tells us:
+
+```text
+Repeating = 2
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### Step 4
+
+`4` belongs at index:
 
 ```text
-i = -4
-left = -1
-right = 2
+4 - 1 = 3
 ```
 
-Calculate:
+It is already there.
+
+Array remains:
 
 ```text
--4 + (-1) + 2 = -3
-```
-
-Since:
-
-```text
--3 < 0
-```
-
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
-
-```text
-i = -1
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
+[1,2,2,4]
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
+## Find Missing Number
 
-There are two `-1`s:
-
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
-
-So:
-
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
-```
-
-skips it.
-
----
-
-## Final Answer
+Now compare every position with its expected value:
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+Index:     0   1   2   3
+Expected:  1   2   3   4
+Actual:    1   2   2   4
+                    ↑
+```
+
+At index `2`:
+
+```text
+Actual = 2
+Expected = 3
+```
+
+Therefore:
+
+```text
+Repeating = 2
+Missing = 3
+```
+
+### Final Answer
+
+```text
+[2,3]
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
+We traverse the array a constant number of times.
 
 ```text
-O(n²)
+O(n)
 ```
 
 ### Space Complexity: O(1)
 
-Ignoring the output, we use only constant extra space.
+We modify the input array in-place and use only a few variables.
+
+```text
+O(1)
+```
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+Because the numbers are from `1` to `n`:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+Number → Correct Index
+
+1 → 0
+2 → 1
+3 → 2
+4 → 3
 ```
 
-Remember:
+So use:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+correctIndex = nums[i] - 1
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+After placing the numbers:
+
+```text
+nums[i] != i + 1
+        ↓
+nums[i] = Repeating Number
+i + 1   = Missing Number
+```
+
+**Cyclic Sort / Index Placement → O(n) Time | O(1) Space**
