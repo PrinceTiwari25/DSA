@@ -1,118 +1,168 @@
-# 3Sum
+# Count of Smaller Numbers After Self
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[Count of Smaller Numbers After Self](https://leetcode.com/problems/count-of-smaller-numbers-after-self/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an integer array `nums`, return an integer array `answer` where:
 
 ```text
-nums[i] + nums[j] + nums[k] = 0
+answer[i]
 ```
 
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+is the number of elements to the **right of `nums[i]`** that are **strictly smaller than `nums[i]`**.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [5,2,6,1]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+[2,1,1,0]
 ```
 
-Because:
+### Explanation
+
+For `5`:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+Right side = [2,6,1]
+
+Smaller numbers:
+2, 1
+
+Count = 2
+```
+
+For `2`:
+
+```text
+Right side = [6,1]
+
+Smaller number:
+1
+
+Count = 1
+```
+
+For `6`:
+
+```text
+Right side = [1]
+
+Smaller number:
+1
+
+Count = 1
+```
+
+For `1`:
+
+```text
+Right side = []
+
+Count = 0
+```
+
+Therefore:
+
+```text
+[2,1,1,0]
 ```
 
 ---
 
-## Solution
+## Optimal Approach: Merge Sort
 
-### Optimal Approach: Sorting + Two Pointers
+A brute-force approach checks every element with all elements to its right.
 
-First, sort the array.
-
-```text
-[-1, 0, 1, 2, -1, -4]
-```
-
-becomes:
+That takes:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+O(n²)
 ```
 
-Then use three positions:
+We can do better using **Merge Sort**.
 
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
+### Main Idea
 
-For every fixed `nums[i]`, calculate:
+During the merge step, the left half and right half are already sorted.
+
+For an element in the left half, if an element from the right half is smaller than it, then that element contributes to the answer.
+
+We maintain:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+smallerCount
 ```
 
-### Three Cases
+which tells us how many elements from the right half have already moved before the current left element.
 
-If:
+### Example
+
+Suppose:
 
 ```text
-sum < 0
+Left  = [5, 6]
+Right = [1, 2]
 ```
 
-The sum is too small, so increase `left`:
+When we compare:
 
 ```text
-left++
+1 < 5
 ```
 
-If:
+we move `1` first.
+
+Now:
 
 ```text
-sum > 0
+smallerCount = 1
 ```
 
-The sum is too large, so decrease `right`:
+Then:
 
 ```text
-right--
+2 < 5
 ```
 
-If:
+Move `2`.
+
+Now:
 
 ```text
-sum == 0
+smallerCount = 2
 ```
 
-We found a valid triplet.
+Therefore, `5` has:
 
-Then move both pointers and skip duplicate values.
+```text
+2
+```
 
-### Duplicate Handling
+smaller elements on its right.
 
-Since the array is sorted, duplicate values are next to each other.
+---
 
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
+## Steps
+
+1. Store every number along with its original index.
+2. Apply Merge Sort.
+3. During merging, count how many right-half elements are smaller.
+4. Add that count to the answer of the current left-half element.
+5. Continue until the entire array is sorted.
+
+The original index is important because the final answer must be in the **original array order**.
 
 
 
@@ -121,153 +171,188 @@ We skip duplicate `i`, `left`, and `right` values so that the result contains on
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [5,2,6,1]
 ```
 
-### Step 1: Sort
+Initially:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+Index:  0  1  2  3
+Value:  5  2  6  1
+```
+
+We keep the original index:
+
+```text
+[5,index 0]
+[2,index 1]
+[6,index 2]
+[1,index 3]
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### Merge `[5]` and `[2]`
+
+Compare:
 
 ```text
-i = -4
-left = -1
-right = 2
+2 < 5
 ```
 
-Calculate:
+So `2` moves first.
 
 ```text
--4 + (-1) + 2 = -3
+smallerCount = 1
 ```
 
-Since:
+Therefore:
 
 ```text
--3 < 0
+answer[0] += 1
 ```
 
-Move `left` forward.
+So:
 
-No valid triplet is found with `-4`.
+```text
+answer = [1,0,0,0]
+```
 
 ---
 
-### Step 3: Fix `-1`
+### Merge `[6]` and `[1]`
+
+Compare:
 
 ```text
-i = -1
-left = -1
-right = 2
+1 < 6
 ```
 
-Calculate:
+So:
 
 ```text
--1 + (-1) + 2 = 0
+smallerCount = 1
 ```
 
-Found:
+Therefore:
 
 ```text
-[-1, -1, 2]
+answer[2] += 1
 ```
-
-Move both pointers.
 
 Now:
 
 ```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
+answer = [1,0,1,0]
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
+### Final Merge
 
-There are two `-1`s:
+The two sorted halves are:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
+Left  = [2,5]
+Right = [1,6]
 ```
 
-If we fix the second `-1` again, we could generate duplicate triplets.
+First:
+
+```text
+1 < 2
+```
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+smallerCount = 1
 ```
 
-skips it.
-
----
-
-## Final Answer
+Now `2` has one smaller element:
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+answer[1] += 1
+```
+
+Then:
+
+```text
+2 < 6
+```
+
+No new smaller right element.
+
+Finally:
+
+```text
+5 < 6
+```
+
+So `5` also has one smaller element on its right:
+
+```text
+answer[0] += 1
+```
+
+Final:
+
+```text
+[2,1,1,0]
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n log n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
+Merge Sort divides the array into smaller parts and merges them efficiently.
 
 ```text
-O(n²)
+O(n log n)
 ```
 
-### Space Complexity: O(1)
+### Space Complexity: O(n)
 
-Ignoring the output, we use only constant extra space.
+We use temporary arrays and store values with their original indices.
+
+```text
+O(n)
+```
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+The main idea is:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+Merge Sort
+    ↓
+Sort while merging
+    ↓
+Count smaller right-side elements
+    ↓
+Store count using original index
 ```
 
-Remember:
+During merging:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+right value < left value
+        ↓
+smallerCount++
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+When taking a left value:
+
+```text
+answer[originalIndex] += smallerCount
+```
+
+### Remember
+
+> **Every right-side element that moves before a left-side element is smaller than it, so it contributes to that left element's count.**
+
+**Merge Sort → O(n log n) Time | O(n) Space**
