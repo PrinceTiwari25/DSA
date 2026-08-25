@@ -1,273 +1,276 @@
-# 3Sum
+# Reverse Pairs
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[Reverse Pairs](https://leetcode.com/problems/reverse-pairs/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an integer array `nums`, return the number of **reverse pairs**.
+
+A reverse pair is a pair of indices `(i, j)` such that:
 
 ```text
-nums[i] + nums[j] + nums[k] = 0
+i < j
 ```
 
-The indices `i`, `j`, and `k` must be different.
+and
 
-The solution must not contain duplicate triplets.
+```text
+nums[i] > 2 * nums[j]
+```
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,3,2,3,1]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+2
+```
+
+The reverse pairs are:
+
+```text
+(3, 1)
+(3, 1)
 ```
 
 Because:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+3 > 2 × 1
 ```
 
 ---
 
 ## Solution
 
-### Optimal Approach: Sorting + Two Pointers
+### Optimal Approach: Merge Sort
 
-First, sort the array.
-
-```text
-[-1, 0, 1, 2, -1, -4]
-```
-
-becomes:
+A brute-force approach checks every possible pair:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+for i
+    for j
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+This takes:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+O(n²)
 ```
 
-### Three Cases
-
-If:
+Instead, we use **Merge Sort** to solve the problem in:
 
 ```text
-sum < 0
+O(n log n)
 ```
 
-The sum is too small, so increase `left`:
+### Main Idea
+
+Merge Sort divides the array into two halves.
+
+After recursively sorting both halves:
 
 ```text
-left++
+Left Half  → sorted
+Right Half → sorted
 ```
 
-If:
+We count the reverse pairs between the two halves before merging them.
+
+For every element in the left half, check:
 
 ```text
-sum > 0
+nums[i] > 2 * nums[j]
 ```
 
-The sum is too large, so decrease `right`:
+Since both halves are sorted, once the condition becomes false, we can stop for that `i`.
+
+This allows us to count multiple reverse pairs efficiently.
+
+---
+
+## Steps
 
 ```text
-right--
+1. Divide the array into two halves.
+2. Count reverse pairs in the left half.
+3. Count reverse pairs in the right half.
+4. Count reverse pairs between the two halves.
+5. Merge the two sorted halves.
 ```
 
-If:
+The total count is:
 
 ```text
-sum == 0
+left pairs + right pairs + cross pairs
 ```
 
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
 
 
+
+---
 
 ## Dry Run
 
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,3,2,3,1]
 ```
 
-### Step 1: Sort
+The array is divided using Merge Sort.
+
+Eventually, we get comparisons between sorted halves.
+
+For example:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+Left  = [3]
+Right = [1]
 ```
 
----
-
-### Step 2: Fix `-4`
+Check:
 
 ```text
-i = -4
-left = -1
-right = 2
+3 > 2 × 1
 ```
-
-Calculate:
 
 ```text
--4 + (-1) + 2 = -3
+3 > 2
 ```
 
-Since:
+True, so:
 
 ```text
--3 < 0
+count = 1
 ```
 
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
+Another `3` and `1` pair also satisfies:
 
 ```text
-i = -1
-left = -1
-right = 2
+3 > 2 × 1
 ```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
-```
-
----
-
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
-
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+count = 2
 ```
 
-skips it.
+Therefore:
+
+```text
+Answer = 2
+```
 
 ---
 
-## Final Answer
+## Important Part
+
+This condition:
+
+```java
+nums[i] > 2L * nums[j]
+```
+
+uses `2L` instead of `2`.
+
+This converts the multiplication to `long` and prevents integer overflow for large values.
+
+---
+
+## Why Does `j - (mid + 1)` Work?
+
+Suppose:
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+Left  = [3, 4]
+Right = [1, 2]
 ```
+
+For `3`:
+
+```text
+3 > 2 × 1  ✓
+3 > 2 × 2  ✓
+```
+
+So `3` forms **2 reverse pairs**.
+
+If `j` has moved two positions:
+
+```text
+j - (mid + 1) = 2
+```
+
+Therefore, we can count both pairs at once.
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n log n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
+Merge Sort divides the array into `log n` levels, and each level processes `n` elements.
 
 ```text
-O(n²)
+O(n log n)
 ```
 
-### Space Complexity: O(1)
+### Space Complexity: O(n)
 
-Ignoring the output, we use only constant extra space.
+The temporary array used during merging requires:
+
+```text
+O(n)
+```
 
 ---
 
 ## Key Takeaway
 
+### Normal Inversion
+
+```text
+nums[i] > nums[j]
+```
+
+### Reverse Pair
+
+```text
+nums[i] > 2 * nums[j]
+```
+
 The main pattern is:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+Merge Sort
+     ↓
+Sort both halves
+     ↓
+Count cross reverse pairs
+     ↓
+Merge
 ```
 
 Remember:
 
-```text
-sum < 0  → left++
+```java
+while (j <= right && nums[i] > 2L * nums[j]) {
+    j++;
+}
 
-sum > 0  → right--
-
-sum == 0 → store triplet
+count += j - (mid + 1);
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+**Merge Sort → O(n log n) Time | O(n) Space**
