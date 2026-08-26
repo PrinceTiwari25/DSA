@@ -1,273 +1,294 @@
-# 3Sum
+# Maximum Product Subarray
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[LeetCode 152 — Maximum Product Subarray](https://leetcode.com/problems/maximum-product-subarray/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
-
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+Given an integer array `nums`, find the contiguous subarray that has the largest product and return its product.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [2,3,-2,4]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+6
 ```
 
-Because:
+The subarray with the maximum product is:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+[2,3]
+```
+
+Product:
+
+```text
+2 × 3 = 6
 ```
 
 ---
 
-## Solution
+## Optimal Approach: Track Maximum and Minimum
 
-### Optimal Approach: Sorting + Two Pointers
-
-First, sort the array.
+For every element, maintain two values:
 
 ```text
-[-1, 0, 1, 2, -1, -4]
+maxProduct
+minProduct
 ```
 
-becomes:
+### Why do we need both?
+
+Because a negative number can change the maximum into the minimum and the minimum into the maximum.
+
+For example:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+minProduct = -6
+current = -4
+
+-6 × -4 = 24
 ```
 
-Then use three positions:
+So a **minimum negative product can become the maximum product**.
 
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
+---
 
-For every fixed `nums[i]`, calculate:
+## Approach
+
+For every number, we have three possibilities:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+1. Start a new subarray
+   → nums[i]
+
+2. Continue using the previous maximum
+   → nums[i] × maxProduct
+
+3. Continue using the previous minimum
+   → nums[i] × minProduct
 ```
 
-### Three Cases
-
-If:
+Therefore:
 
 ```text
-sum < 0
+newMax = max(
+    nums[i],
+    nums[i] × maxProduct,
+    nums[i] × minProduct
+)
 ```
 
-The sum is too small, so increase `left`:
+And:
 
 ```text
-left++
+newMin = min(
+    nums[i],
+    nums[i] × maxProduct,
+    nums[i] × minProduct
+)
 ```
 
-If:
+Finally:
 
 ```text
-sum > 0
+answer = max(answer, maxProduct)
 ```
 
-The sum is too large, so decrease `right`:
+### Important
 
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
+Calculate `newMax` and `newMin` first because both must use the **previous** `maxProduct` and `minProduct`.
 
 
+
+---
 
 ## Dry Run
 
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [2,3,-2,4]
 ```
 
-### Step 1: Sort
+Initially:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+maxProduct = 2
+minProduct = 2
+answer = 2
+```
+
+### `num = 3`
+
+Possible products:
+
+```text
+3
+3 × 2 = 6
+3 × 2 = 6
+```
+
+Therefore:
+
+```text
+maxProduct = 6
+minProduct = 3
+answer = 6
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### `num = -2`
+
+Possible products:
 
 ```text
-i = -4
-left = -1
-right = 2
+-2
+-2 × 6  = -12
+-2 × 3  = -6
 ```
 
-Calculate:
+Therefore:
 
 ```text
--4 + (-1) + 2 = -3
-```
-
-Since:
-
-```text
--3 < 0
-```
-
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
-
-```text
-i = -1
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
+maxProduct = -2
+minProduct = -12
+answer = 6
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
+### `num = 4`
 
-There are two `-1`s:
+Possible products:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
+4
+4 × (-2)  = -8
+4 × (-12) = -48
 ```
 
-If we fix the second `-1` again, we could generate duplicate triplets.
+Therefore:
+
+```text
+maxProduct = 4
+minProduct = -48
+answer = 6
+```
+
+Final answer:
+
+```text
+6
+```
+
+---
+
+## Why `minProduct` is Important
+
+Consider:
+
+```text
+nums = [-2,3,-4]
+```
+
+After processing `3`:
+
+```text
+maxProduct = 3
+minProduct = -6
+```
+
+Now process `-4`:
+
+```text
+-4 × 3  = -12
+-4 × -6 = 24
+```
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+maxProduct = 24
 ```
 
-skips it.
-
----
-
-## Final Answer
+The maximum product comes from:
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+[-2,3,-4]
 ```
+
+```text
+(-2) × 3 × (-4) = 24
+```
+
+This is why tracking only `maxProduct` would fail.
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
-
-```text
-O(n²)
-```
+We traverse the array only once.
 
 ### Space Complexity: O(1)
 
-Ignoring the output, we use only constant extra space.
+We use only a few variables.
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+For **Maximum Product Subarray**, remember:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+Negative × Negative = Positive
 ```
 
-Remember:
+Therefore, we must track:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+maxProduct
+minProduct
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+At every element:
+
+```text
+newMax = max(num, num × maxProduct, num × minProduct)
+
+newMin = min(num, num × maxProduct, num × minProduct)
+```
+
+Then:
+
+```text
+answer = max(answer, maxProduct)
+```
+
+### Pattern
+
+```text
+Maximum Product Subarray
+          ↓
+Track Max + Min
+          ↓
+Handle Negative Numbers
+          ↓
+O(n) Time
+O(1) Space
+```
+
+**Maximum Product Subarray → O(n) Time | O(1) Space**
