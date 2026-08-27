@@ -1,273 +1,260 @@
-# 3Sum
+# Merge Sorted Array
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[LeetCode 88 — Merge Sorted Array](https://leetcode.com/problems/merge-sorted-array/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+You are given two sorted integer arrays `nums1` and `nums2`.
 
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
+- `nums1` has enough space at the end to store all elements of `nums2`.
+- `m` represents the number of valid elements in `nums1`.
+- `n` represents the number of elements in `nums2`.
 
-The indices `i`, `j`, and `k` must be different.
+Merge `nums2` into `nums1` so that `nums1` becomes sorted.
 
-The solution must not contain duplicate triplets.
+The merge must be done **in-place**.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums1 = [1,2,3,0,0,0]
+m = 3
+
+nums2 = [2,5,6]
+n = 3
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
-```
-
-Because:
-
-```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+[1,2,2,3,5,6]
 ```
 
 ---
 
-## Solution
+## Optimal Approach: Three Pointers from the Back
 
-### Optimal Approach: Sorting + Two Pointers
+Since `nums1` already contains its valid elements at the beginning and has empty spaces at the end, we merge from the **back**.
 
-First, sort the array.
-
-```text
-[-1, 0, 1, 2, -1, -4]
-```
-
-becomes:
+Use three pointers:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+i = m - 1
+j = n - 1
+k = m + n - 1
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+Where:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+i → last valid element of nums1
+j → last element of nums2
+k → last position of nums1
 ```
 
-### Three Cases
+### Why Start from the Back?
 
-If:
+If we start from the front, we may overwrite the existing elements of `nums1`.
+
+Starting from the back allows us to use the empty positions safely.
+
+---
+
+## Steps
+
+Compare:
 
 ```text
-sum < 0
+nums1[i] and nums2[j]
 ```
 
-The sum is too small, so increase `left`:
+### If `nums1[i] > nums2[j]`
+
+Place `nums1[i]` at position `k`:
 
 ```text
-left++
+nums1[k] = nums1[i]
 ```
 
-If:
+Then:
 
 ```text
-sum > 0
+i--
+k--
 ```
 
-The sum is too large, so decrease `right`:
+### Otherwise
+
+Place `nums2[j]` at position `k`:
 
 ```text
-right--
+nums1[k] = nums2[j]
 ```
 
-If:
+Then:
 
 ```text
-sum == 0
+j--
+k--
 ```
 
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
+Continue until all elements of `nums2` are placed.
 
 
+
+---
 
 ## Dry Run
 
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums1 = [1,2,3,0,0,0]
+nums2 = [2,5,6]
 ```
 
-### Step 1: Sort
+Initially:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+i = 2 → 3
+j = 2 → 6
+k = 5
+```
+
+### Step 1
+
+Compare:
+
+```text
+3 vs 6
+```
+
+`6` is larger.
+
+```text
+nums1[5] = 6
+```
+
+Array:
+
+```text
+[1,2,3,0,0,6]
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### Step 2
+
+Compare:
 
 ```text
-i = -4
-left = -1
-right = 2
+3 vs 5
 ```
 
-Calculate:
+`5` is larger.
 
 ```text
--4 + (-1) + 2 = -3
-```
-
-Since:
-
-```text
--3 < 0
-```
-
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
-
-```text
-i = -1
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
+[1,2,3,0,5,6]
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
+### Step 3
 
-There are two `-1`s:
+Compare:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
+3 vs 2
 ```
 
-If we fix the second `-1` again, we could generate duplicate triplets.
+`3` is larger.
 
-So:
-
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+[1,2,3,3,5,6]
 ```
-
-skips it.
 
 ---
 
-## Final Answer
+### Step 4
+
+Compare:
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+2 vs 2
+```
+
+Place `2` from `nums2`:
+
+```text
+[1,2,2,3,5,6]
+```
+
+Now all elements of `nums2` are placed.
+
+### Final Answer
+
+```text
+[1,2,2,3,5,6]
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(m + n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
-
-```text
-O(n²)
-```
+Each element is processed at most once.
 
 ### Space Complexity: O(1)
 
-Ignoring the output, we use only constant extra space.
+The merge is performed directly inside `nums1`, so no extra array is required.
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+The main trick is:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+Merge from the BACK
 ```
 
-Remember:
+Use:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+i → nums1
+j → nums2
+k → final position
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+Pattern:
+
+```text
+Compare largest elements
+        ↓
+Put larger element at k
+        ↓
+Move pointer backward
+```
+
+```text
+nums1[i] > nums2[j]
+        ↓
+nums1[k] = nums1[i]
+
+Otherwise
+        ↓
+nums1[k] = nums2[j]
+```
+
+### Remember
+
+> **When merging sorted arrays in-place, start from the end so existing elements in `nums1` are not overwritten.**
+
+**Three Pointers → O(m+n) Time | O(1) Space**
