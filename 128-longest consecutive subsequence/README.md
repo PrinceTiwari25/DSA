@@ -1,273 +1,404 @@
-# 3Sum
+# Longest Consecutive Sequence
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[LeetCode 128 — Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an unsorted integer array `nums`, return the length of the longest consecutive elements sequence.
 
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
+The sequence must contain consecutive numbers, and the elements do not need to be next to each other in the original array.
 
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+The algorithm must run in **O(n)** time.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [100,4,200,1,3,2]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+4
 ```
 
-Because:
+The longest consecutive sequence is:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+[1,2,3,4]
+```
+
+Length:
+
+```text
+4
 ```
 
 ---
 
-## Solution
+## Optimal Approach: HashSet
 
-### Optimal Approach: Sorting + Two Pointers
+We use a `HashSet` to store all numbers.
 
-First, sort the array.
+### Why HashSet?
 
-```text
-[-1, 0, 1, 2, -1, -4]
-```
+A `HashSet` provides approximately **O(1)** average-time lookup.
 
-becomes:
+So we can quickly check:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+Does num - 1 exist?
+Does num + 1 exist?
 ```
 
-Then use three positions:
+---
 
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
+## Main Idea
 
-For every fixed `nums[i]`, calculate:
+We should only start building a sequence when the current number is the **first number** of that sequence.
+
+For example:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+[1,2,3,4]
 ```
 
-### Three Cases
-
-If:
+When we are at `1`:
 
 ```text
-sum < 0
+0 does not exist
 ```
 
-The sum is too small, so increase `left`:
+So `1` is the beginning of the sequence.
+
+But when we are at `2`:
 
 ```text
-left++
+1 exists
 ```
 
-If:
+So `2` is not the beginning.
+
+Therefore:
 
 ```text
-sum > 0
+if (!set.contains(num - 1))
 ```
 
-The sum is too large, so decrease `right`:
+means:
+
+> Start counting only when `num` is the beginning of a sequence.
+
+---
+
+## Steps
+
+### Step 1: Store all numbers
+
+```java
+HashSet<Integer> set = new HashSet<>();
+```
+
+Add every number to the set.
+
+### Step 2: Find sequence beginnings
+
+For every number:
 
 ```text
-right--
+if num - 1 does not exist
 ```
 
-If:
+then `num` is the beginning.
+
+### Step 3: Count consecutive numbers
+
+Starting from `num`:
 
 ```text
-sum == 0
+num
+num + 1
+num + 2
+num + 3
+...
 ```
 
-We found a valid triplet.
+Continue while the next number exists.
 
-Then move both pointers and skip duplicate values.
+### Step 4: Keep the maximum length
 
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
+```text
+longest = max(longest, count)
+```
 
 
+
+---
 
 ## Dry Run
 
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [100,4,200,1,3,2]
 ```
 
-### Step 1: Sort
+Put everything into the `HashSet`:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+{100, 4, 200, 1, 3, 2}
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### Start with `100`
+
+Check:
 
 ```text
-i = -4
-left = -1
-right = 2
+100 - 1 = 99
 ```
 
-Calculate:
+`99` does not exist.
+
+So `100` is the beginning of a sequence.
+
+Check:
 
 ```text
--4 + (-1) + 2 = -3
+101 exists? No
 ```
 
-Since:
+Sequence:
 
 ```text
--3 < 0
+[100]
 ```
 
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
+Length:
 
 ```text
-i = -1
-left = -1
-right = 2
+1
 ```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
-```
-
----
-
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
-
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+longest = 1
 ```
 
-skips it.
+---
+
+### Start with `4`
+
+Check:
+
+```text
+4 - 1 = 3
+```
+
+`3` exists.
+
+Therefore `4` is **not** the beginning.
+
+Skip it.
+
+---
+
+### Start with `200`
+
+Check:
+
+```text
+199 exists? No
+```
+
+So `200` is a beginning.
+
+```text
+200 → 201 does not exist
+```
+
+Length:
+
+```text
+1
+```
+
+`longest` remains:
+
+```text
+1
+```
+
+---
+
+### Start with `1`
+
+Check:
+
+```text
+1 - 1 = 0
+```
+
+`0` does not exist.
+
+So `1` is the beginning of a sequence.
+
+Now keep checking:
+
+```text
+1 → 2 ✓
+2 → 3 ✓
+3 → 4 ✓
+4 → 5 ✗
+```
+
+Therefore:
+
+```text
+Sequence = [1,2,3,4]
+Length = 4
+```
+
+Update:
+
+```text
+longest = 4
+```
+
+---
+
+### `3`
+
+Check:
+
+```text
+3 - 1 = 2
+```
+
+`2` exists.
+
+Skip.
+
+### `2`
+
+Check:
+
+```text
+2 - 1 = 1
+```
+
+`1` exists.
+
+Skip.
 
 ---
 
 ## Final Answer
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+4
+```
+
+The longest consecutive sequence is:
+
+```text
+[1,2,3,4]
+```
+
+---
+
+## Why Don't We Sort?
+
+A sorting solution would be:
+
+```text
+Sort → O(n log n)
+```
+
+But the problem asks for an **O(n)** solution.
+
+Using a `HashSet` gives us:
+
+```text
+HashSet → O(1) average lookup
+```
+
+Therefore, we can solve it in:
+
+```text
+O(n)
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
+We insert all elements into the set and process each sequence only from its starting number.
 
-Therefore:
+### Space Complexity: O(n)
 
-```text
-O(n²)
-```
-
-### Space Complexity: O(1)
-
-Ignoring the output, we use only constant extra space.
+The `HashSet` stores the elements.
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+The most important condition is:
 
-```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+```java
+if (!set.contains(num - 1))
 ```
 
-Remember:
+It means:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+num - 1 doesn't exist
+        ↓
+num is the START of a sequence
+        ↓
+Start counting
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+For:
+
+```text
+[1,2,3,4]
+```
+
+we only start from:
+
+```text
+1
+```
+
+not:
+
+```text
+2
+3
+4
+```
+
+### Remember
+
+```text
+HashSet
+   ↓
+Find sequence START
+   ↓
+Count num + 1
+   ↓
+Update longest
+```
+
+**HashSet → O(n) Time | O(n) Space**
