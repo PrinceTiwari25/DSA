@@ -1,273 +1,446 @@
-# 3Sum
+# Contiguous Array
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[LeetCode 525 — Contiguous Array](https://leetcode.com/problems/contiguous-array/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
-
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+Given a binary array `nums`, return the maximum length of a contiguous subarray with an equal number of `0` and `1`.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [0,1,0,1]
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+4
 ```
 
-Because:
+The entire array contains:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+0 → 2 times
+1 → 2 times
+```
+
+Therefore, the longest subarray length is:
+
+```text
+4
 ```
 
 ---
 
-## Solution
+## Optimal Approach: Prefix Sum + HashMap
 
-### Optimal Approach: Sorting + Two Pointers
-
-First, sort the array.
+The main trick is to convert:
 
 ```text
-[-1, 0, 1, 2, -1, -4]
+0 → -1
+1 → +1
 ```
 
-becomes:
+Then the problem becomes:
+
+> Find the longest subarray whose sum is `0`.
+
+### Why?
+
+Consider:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+[0,1,0,1]
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+After conversion:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+[-1,+1,-1,+1]
 ```
 
-### Three Cases
-
-If:
+If a subarray has an equal number of `0`s and `1`s:
 
 ```text
-sum < 0
+(-1) + (+1) = 0
 ```
 
-The sum is too small, so increase `left`:
+So we need to find the longest subarray with sum `0`.
+
+---
+
+## Prefix Sum
+
+We maintain:
 
 ```text
-left++
+prefixSum
 ```
 
-If:
+At every index:
 
 ```text
-sum > 0
+0 → prefixSum--
+1 → prefixSum++
 ```
 
-The sum is too large, so decrease `right`:
+We store the **first index** where each prefix sum occurs in a `HashMap`.
+
+### Important Idea
+
+If the same prefix sum occurs at two different indices:
 
 ```text
-right--
+prefixSum[i] == prefixSum[j]
 ```
 
-If:
+then the sum between those indices is `0`.
+
+Therefore, that subarray contains an equal number of `0`s and `1`s.
+
+---
+
+## Steps
 
 ```text
-sum == 0
+1. Create a HashMap.
+2. Store prefixSum 0 at index -1.
+3. Convert 0 to -1 and 1 to +1.
+4. Calculate prefix sum.
+5. If the prefix sum was seen before:
+      calculate the subarray length.
+6. Otherwise:
+      store its first index.
+7. Keep the maximum length.
 ```
 
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
 
 
+---
 
 ## Dry Run
 
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [0,1,0,1]
 ```
 
-### Step 1: Sort
+Convert:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+0 → -1
+1 → +1
 ```
-
----
-
-### Step 2: Fix `-4`
-
-```text
-i = -4
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--4 + (-1) + 2 = -3
-```
-
-Since:
-
-```text
--3 < 0
-```
-
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
-
-```text
-i = -1
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
-```
-
----
-
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
-
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
+```text
+[-1,+1,-1,+1]
+```
+
+Initially:
+
+```text
+prefixSum = 0
+maxLength = 0
+
+map = {0 : -1}
+```
+
+---
+
+### Index 0
+
+```text
+nums[0] = 0
+```
+
+So:
+
+```text
+prefixSum = -1
+```
+
+`-1` is not in the map.
+
+Store:
+
+```text
+map = {
+    0 : -1,
+   -1 : 0
 }
 ```
 
-skips it.
+---
+
+### Index 1
+
+```text
+nums[1] = 1
+```
+
+So:
+
+```text
+prefixSum = 0
+```
+
+`0` already exists at index `-1`.
+
+Therefore:
+
+```text
+length = 1 - (-1)
+       = 2
+```
+
+Update:
+
+```text
+maxLength = 2
+```
+
+The subarray is:
+
+```text
+[0,1]
+```
+
+---
+
+### Index 2
+
+```text
+nums[2] = 0
+```
+
+So:
+
+```text
+prefixSum = -1
+```
+
+`-1` already exists at index `0`.
+
+Therefore:
+
+```text
+length = 2 - 0
+       = 2
+```
+
+`maxLength` remains:
+
+```text
+2
+```
+
+---
+
+### Index 3
+
+```text
+nums[3] = 1
+```
+
+So:
+
+```text
+prefixSum = 0
+```
+
+`0` already exists at index `-1`.
+
+Therefore:
+
+```text
+length = 3 - (-1)
+       = 4
+```
+
+Update:
+
+```text
+maxLength = 4
+```
 
 ---
 
 ## Final Answer
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+4
 ```
+
+The longest subarray is:
+
+```text
+[0,1,0,1]
+```
+
+It contains:
+
+```text
+0 → 2
+1 → 2
+```
+
+---
+
+## Why Store Only the First Occurrence?
+
+Suppose a prefix sum occurs at:
+
+```text
+index 2
+index 5
+index 8
+```
+
+For index `8`, using the earliest occurrence gives:
+
+```text
+8 - 2 = 6
+```
+
+while:
+
+```text
+8 - 5 = 3
+```
+
+So the **first occurrence always gives the longest possible subarray**.
+
+That's why:
+
+```java
+if (!map.containsKey(prefixSum)) {
+    map.put(prefixSum, i);
+}
+```
+
+---
+
+## Why Do We Put `0 : -1`?
+
+This is an important trick.
+
+Consider:
+
+```text
+nums = [0,1]
+```
+
+After conversion:
+
+```text
+[-1,+1]
+```
+
+At index `1`:
+
+```text
+prefixSum = 0
+```
+
+The entire array has sum `0`.
+
+To calculate its length:
+
+```text
+1 - (-1) = 2
+```
+
+That's why we initially store:
+
+```java
+map.put(0, -1);
+```
+
+It represents a prefix sum of `0` **before the array starts**.
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
+We traverse the array once.
 
-Therefore:
+HashMap lookup and insertion take `O(1)` average time.
 
 ```text
-O(n²)
+O(n)
 ```
 
-### Space Complexity: O(1)
+### Space Complexity: O(n)
 
-Ignoring the output, we use only constant extra space.
+The HashMap can store up to `O(n)` different prefix sums.
+
+```text
+O(n)
+```
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+The main trick is:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+0 → -1
+1 → +1
 ```
 
-Remember:
+Then:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+Equal number of 0s and 1s
+             ↓
+        Sum becomes 0
+             ↓
+      Same prefix sum
+             ↓
+      Calculate length
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+### Remember
+
+```text
+map.put(0, -1)
+```
+
+and:
+
+```text
+if (map.containsKey(prefixSum)) {
+    length = i - map.get(prefixSum);
+}
+```
+
+### Pattern
+
+```text
+Binary Array
+     ↓
+0 = -1, 1 = +1
+     ↓
+Prefix Sum
+     ↓
+HashMap
+     ↓
+Same Prefix Sum
+     ↓
+Maximum Length
+```
+
+**Prefix Sum + HashMap → O(n) Time | O(n) Space**
