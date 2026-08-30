@@ -1,273 +1,429 @@
-# 3Sum
+# Subarray Sum Equals K
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[LeetCode 560 — Subarray Sum Equals K](https://leetcode.com/problems/subarray-sum-equals-k/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
-
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
+Given an integer array `nums` and an integer `k`, return the **total number of continuous subarrays whose sum equals `k`**.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,1,1]
+k = 2
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+2
 ```
 
-Because:
+The valid subarrays are:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+[1,1]
+[1,1]
+```
+
+Both have sum:
+
+```text
+1 + 1 = 2
 ```
 
 ---
 
-## Solution
+## Optimal Approach: Prefix Sum + HashMap
 
-### Optimal Approach: Sorting + Two Pointers
-
-First, sort the array.
+We use:
 
 ```text
-[-1, 0, 1, 2, -1, -4]
+Prefix Sum + HashMap
 ```
 
-becomes:
+The HashMap stores:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+prefixSum → frequency
 ```
 
-Then use three positions:
+### Main Idea
 
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+Suppose the current prefix sum is:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
+currentSum
 ```
 
-### Three Cases
-
-If:
+We need a previous prefix sum such that:
 
 ```text
-sum < 0
+currentSum - previousSum = k
 ```
 
-The sum is too small, so increase `left`:
+Rearranging:
 
 ```text
-left++
+previousSum = currentSum - k
 ```
 
-If:
+Therefore, at every index we check:
+
+```java
+map.containsKey(prefixSum - k)
+```
+
+If it exists, its frequency tells us how many subarrays ending at the current index have sum `k`.
+
+---
+
+## Steps
 
 ```text
-sum > 0
+1. Create a HashMap.
+2. Put (0, 1) in the map.
+3. Traverse the array.
+4. Calculate the prefix sum.
+5. Find prefixSum - k in the map.
+6. Add its frequency to the answer.
+7. Store the current prefix sum and its frequency.
 ```
 
-The sum is too large, so decrease `right`:
-
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
 
 
+---
 
 ## Dry Run
 
 ### Input
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [1,1,1]
+k = 2
 ```
 
-### Step 1: Sort
+Initially:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+prefixSum = 0
+count = 0
+
+map = {0 : 1}
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### Step 1
+
+Current number:
 
 ```text
-i = -4
-left = -1
-right = 2
+1
 ```
 
-Calculate:
+Prefix sum:
 
 ```text
--4 + (-1) + 2 = -3
+prefixSum = 1
 ```
 
-Since:
+We need:
 
 ```text
--3 < 0
+prefixSum - k
+= 1 - 2
+= -1
 ```
 
-Move `left` forward.
+`-1` is not present.
 
-No valid triplet is found with `-4`.
+Store:
+
+```text
+map = {0:1, 1:1}
+```
 
 ---
 
-### Step 3: Fix `-1`
+### Step 2
+
+Current number:
 
 ```text
-i = -1
-left = -1
-right = 2
+1
 ```
 
-Calculate:
+Prefix sum:
 
 ```text
--1 + (-1) + 2 = 0
+prefixSum = 2
 ```
 
-Found:
+We need:
 
 ```text
-[-1, -1, 2]
+2 - 2 = 0
 ```
 
-Move both pointers.
+`0` exists once.
+
+Therefore:
+
+```text
+count += 1
+```
 
 Now:
 
 ```text
--1 + 0 + 1 = 0
+count = 1
 ```
 
-Found:
+This represents:
 
 ```text
-[-1, 0, 1]
+[1,1]
+```
+
+Store:
+
+```text
+map = {0:1, 1:1, 2:1}
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
+### Step 3
 
-There are two `-1`s:
+Current number:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
+1
 ```
 
-If we fix the second `-1` again, we could generate duplicate triplets.
+Prefix sum:
 
-So:
-
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+prefixSum = 3
 ```
 
-skips it.
+We need:
+
+```text
+3 - 2 = 1
+```
+
+`1` exists once.
+
+Therefore:
+
+```text
+count += 1
+```
+
+Now:
+
+```text
+count = 2
+```
+
+This represents the second:
+
+```text
+[1,1]
+```
 
 ---
 
 ## Final Answer
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+2
+```
+
+---
+
+## Why `map.put(0, 1)`?
+
+This is an important step:
+
+```java
+map.put(0, 1);
+```
+
+It represents a prefix sum of `0` **before the array starts**.
+
+For example:
+
+```text
+nums = [3]
+k = 3
+```
+
+At the first element:
+
+```text
+prefixSum = 3
+```
+
+We need:
+
+```text
+3 - 3 = 0
+```
+
+Because `0` is already in the map:
+
+```text
+count += 1
+```
+
+So `[3]` is correctly counted as a subarray with sum `3`.
+
+---
+
+## Why Store Frequency?
+
+This problem asks:
+
+> **How many subarrays have sum K?**
+
+A prefix sum can occur multiple times.
+
+Suppose:
+
+```text
+map = {
+    5 : 3
+}
+```
+
+This means prefix sum `5` has appeared **3 times**.
+
+If:
+
+```text
+currentPrefixSum - k = 5
+```
+
+then all 3 occurrences can create a valid subarray.
+
+Therefore:
+
+```java
+count += map.get(prefixSum - k);
+```
+
+---
+
+## Important Difference: LC 525 vs LC 560
+
+### LC 525 — Contiguous Array
+
+Find the **longest** valid subarray.
+
+```text
+Store → First Index
+```
+
+Then:
+
+```text
+length = currentIndex - firstIndex
+```
+
+### LC 560 — Subarray Sum Equals K
+
+Find the **number** of valid subarrays.
+
+```text
+Store → Frequency
+```
+
+Then:
+
+```text
+count += frequency
+```
+
+### Remember
+
+```text
+Longest → Store First Index
+
+Count → Store Frequency
 ```
 
 ---
 
 ## Complexity Analysis
 
-### Time Complexity: O(n²)
+### Time Complexity: O(n)
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
+We traverse the array once.
 
-Therefore:
+HashMap operations take `O(1)` average time.
 
 ```text
-O(n²)
+O(n)
 ```
 
-### Space Complexity: O(1)
+### Space Complexity: O(n)
 
-Ignoring the output, we use only constant extra space.
+The HashMap can contain up to `O(n)` different prefix sums.
+
+```text
+O(n)
+```
 
 ---
 
 ## Key Takeaway
 
-The main pattern is:
+The main formula is:
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+currentPrefixSum - previousPrefixSum = k
 ```
 
-Remember:
+Therefore:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+previousPrefixSum = currentPrefixSum - k
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+So:
+
+```text
+Prefix Sum
+     ↓
+prefixSum - k
+     ↓
+Search in HashMap
+     ↓
+Found?
+     ↓
+Add its frequency
+```
+
+### Remember
+
+```java
+count += map.getOrDefault(prefixSum - k, 0);
+```
+
+and:
+
+```java
+map.put(prefixSum,
+        map.getOrDefault(prefixSum, 0) + 1);
+```
+
+**Prefix Sum + HashMap → O(n) Time | O(n) Space**
