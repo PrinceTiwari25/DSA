@@ -1,29 +1,20 @@
 class Solution {
+    public int countTriplets(int[] arr) {
 
-    public long subarrayXor(int[] nums, int k) {
+        int count = 0;
 
-        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < arr.length; i++) {
 
-        // XOR 0 occurs once before the array starts
-        map.put(0, 1);
+            int xor = 0;
 
-        int prefixXor = 0;
-        long count = 0;
+            for (int j = i; j < arr.length; j++) {
 
-        for (int num : nums) {
+                xor ^= arr[j];
 
-            prefixXor ^= num;
-
-            int required = prefixXor ^ k;
-
-            if (map.containsKey(required)) {
-                count += map.get(required);
+                if (xor == 0) {
+                    count += j - i;
+                }
             }
-
-            map.put(
-                prefixXor,
-                map.getOrDefault(prefixXor, 0) + 1
-            );
         }
 
         return count;
