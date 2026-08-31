@@ -1,155 +1,175 @@
-# Count Subarrays With XOR K
+# Count Triplets That Can Form Two Arrays of Equal XOR
+
+## LeetCode Problem
+
+[LeetCode 1442 — Count Triplets That Can Form Two Arrays of Equal XOR](https://leetcode.com/problems/count-triplets-that-can-form-two-arrays-of-equal-xor/)
+
+---
 
 ## Problem
 
-Given an integer array `nums` and an integer `k`, find the **number of subarrays whose XOR is equal to `k`**.
+Given an array `arr`, choose three indices `i`, `j`, and `k` such that:
 
-> Note: The classic problem "Count Subarrays With XOR K" is not an exact official LeetCode problem. It is a common DSA problem based on the **Prefix XOR + HashMap** pattern.
+```text
+0 <= i < j <= k < arr.length
+```
+
+Define:
+
+```text
+a = arr[i] ^ arr[i+1] ^ ... ^ arr[j-1]
+```
+
+and:
+
+```text
+b = arr[j] ^ arr[j+1] ^ ... ^ arr[k]
+```
+
+The goal is to count the number of triplets `(i, j, k)` for which:
+
+```text
+a == b
+```
 
 ---
 
 ## Example
 
-**Input:**
+### Input
 
 ```text
-nums = [4,2,2,6,4]
-k = 6
+arr = [2,3,1,6,7]
 ```
 
-**Output:**
+### Output
 
 ```text
 4
-```
-
-The subarrays having XOR equal to `6` are:
-
-```text
-[4,2]
-[2,2,6]
-[6]
-[4,2,2,6,4]
-```
-
-Therefore:
-
-```text
-Answer = 4
 ```
 
 ---
 
 # Optimal Approach
 
-## Prefix XOR + HashMap
+## Prefix XOR
 
-We maintain:
+The key observation is:
 
 ```text
-prefixXor
+a == b
 ```
 
-which represents the XOR of all elements from the beginning up to the current index.
-
-The HashMap stores:
+where:
 
 ```text
-prefixXor → frequency
-```
-
----
-
-## Main Idea
-
-Suppose:
-
-```text
-currentPrefixXor = X
-```
-
-and we want a subarray with XOR `k`.
-
-Let the previous prefix XOR be `P`.
-
-Then:
-
-```text
-P ^ X = k
-```
-
-Using XOR properties:
-
-```text
-P = X ^ k
-```
-
-Therefore, at every element we calculate:
-
-```text
-required = prefixXor ^ k
-```
-
-and check whether `required` already exists in the HashMap.
-
-If it exists, its frequency tells us how many valid subarrays end at the current index.
-
----
-
-# Why Does This Work?
-
-Suppose:
-
-```text
-prefixXor before = P
-prefixXor current = X
-```
-
-The XOR of the elements between them is:
-
-```text
-P ^ X
+a = arr[i] ^ ... ^ arr[j-1]
+b = arr[j] ^ ... ^ arr[k]
 ```
 
 If:
 
 ```text
-P ^ X = k
+a == b
 ```
 
-then we have found a subarray whose XOR is `k`.
+then:
+
+```text
+a ^ b = 0
+```
 
 Therefore:
 
 ```text
-P = X ^ k
+arr[i] ^ arr[i+1] ^ ... ^ arr[k] = 0
 ```
 
-That's why we search for:
+So instead of directly comparing `a` and `b`, we can find a subarray from `i` to `k` whose XOR is `0`.
+
+---
+
+## Important Observation
+
+If:
 
 ```text
-prefixXor ^ k
+arr[i] ^ arr[i+1] ^ ... ^ arr[k] = 0
+```
+
+then **every possible `j` between `i+1` and `k`** creates a valid triplet.
+
+The number of possible `j` values is:
+
+```text
+k - i
+```
+
+Therefore:
+
+```text
+count += k - i
 ```
 
 ---
 
-# Steps
+# Approach Using Two Loops
+
+We can fix the starting index `i` and keep calculating the XOR while moving `k`.
+
+### Steps
 
 ```text
-1. Create a HashMap.
-2. Put (0, 1) in the map.
-3. Set prefixXor = 0.
-4. Traverse the array.
-5. Update prefixXor using XOR.
-6. Calculate:
-      required = prefixXor ^ k
-7. If required exists:
-      add its frequency to answer.
-8. Store the current prefixXor frequency.
-9. Return the count.
+1. Start from every index i.
+2. Set xor = 0.
+3. Move k from i to the end.
+4. Keep updating:
+      xor = xor ^ arr[k]
+5. If xor becomes 0:
+      add k - i to the answer.
+6. Return the total count.
 ```
 
+---
 
+# Why `k - i`?
+
+Suppose:
+
+```text
+i = 0
+k = 3
+```
+
+and the XOR from `i` to `k` is `0`.
+
+Possible `j` values are:
+
+```text
+j = 1
+j = 2
+j = 3
+```
+
+That's:
+
+```text
+3
+```
+
+possibilities.
+
+And:
+
+```text
+k - i = 3 - 0 = 3
+```
+
+Therefore:
+
+```text
+count += k - i
+```
 
 ---
 
@@ -158,225 +178,216 @@ prefixXor ^ k
 ### Input
 
 ```text
-nums = [4,2,2,6,4]
-k = 6
+arr = [2,3,1,6,7]
 ```
 
-Initially:
+We start with:
 
 ```text
-prefixXor = 0
 count = 0
-
-map = {0 : 1}
 ```
 
 ---
 
-## Index 0
+## i = 0
+
+Start:
 
 ```text
-num = 4
+xor = 0
 ```
 
-Calculate:
+### k = 0
 
 ```text
-prefixXor = 0 ^ 4
-          = 4
+xor = 0 ^ 2
+     = 2
 ```
 
-Required:
+Not zero.
 
 ```text
-required = 4 ^ 6
-         = 2
-```
-
-`2` is not in the map.
-
-Store:
-
-```text
-map = {
-    0 : 1,
-    4 : 1
-}
+count = 0
 ```
 
 ---
 
-## Index 1
+### k = 1
 
 ```text
-num = 2
+xor = 2 ^ 3
+     = 1
 ```
+
+Not zero.
 
 ```text
-prefixXor = 4 ^ 2
-          = 6
+count = 0
 ```
 
-Required:
+---
+
+### k = 2
 
 ```text
-6 ^ 6 = 0
+xor = 1 ^ 1
+     = 0
 ```
 
-`0` exists once.
+Now XOR is zero.
 
 Therefore:
 
 ```text
-count = 1
+count += k - i
+       += 2 - 0
+       += 2
 ```
 
-The subarray is:
-
 ```text
-[4,2]
+count = 2
 ```
 
-because:
+Possible `j` values:
 
 ```text
-4 ^ 2 = 6
-```
-
-Store:
-
-```text
-map = {
-    0 : 1,
-    4 : 1,
-    6 : 1
-}
+j = 1
+j = 2
 ```
 
 ---
 
-## Index 2
+### k = 3
 
 ```text
-num = 2
+xor = 0 ^ 6
+     = 6
 ```
 
+Not zero.
+
+---
+
+### k = 4
+
 ```text
-prefixXor = 6 ^ 2
-          = 4
+xor = 6 ^ 7
+     = 1
 ```
 
-Required:
+Not zero.
+
+---
+
+# i = 1
+
+Reset:
 
 ```text
-4 ^ 6 = 2
+xor = 0
 ```
 
-`2` is not in the map.
-
-Store frequency of `4`:
+### k = 1
 
 ```text
-map = {
-    0 : 1,
-    4 : 2,
-    6 : 1
-}
+xor = 0 ^ 3
+     = 3
+```
+
+Not zero.
+
+### k = 2
+
+```text
+xor = 3 ^ 1
+     = 2
+```
+
+Not zero.
+
+### k = 3
+
+```text
+xor = 2 ^ 6
+     = 4
+```
+
+Not zero.
+
+### k = 4
+
+```text
+xor = 4 ^ 7
+     = 3
+```
+
+Not zero.
+
+No addition.
+
+```text
+count = 2
 ```
 
 ---
 
-## Index 3
+# i = 2
+
+Start:
 
 ```text
-num = 6
+xor = 0
 ```
+
+### k = 2
 
 ```text
-prefixXor = 4 ^ 6
-          = 2
+xor = 1
 ```
 
-Required:
+Not zero.
+
+### k = 3
 
 ```text
-2 ^ 6 = 4
+xor = 1 ^ 6
+     = 7
 ```
 
-`4` appears **2 times**.
+Not zero.
+
+### k = 4
+
+```text
+xor = 7 ^ 7
+     = 0
+```
+
+XOR is zero.
 
 Therefore:
 
 ```text
-count += 2
+count += 4 - 2
+       += 2
 ```
 
 Now:
 
 ```text
-count = 3
-```
-
-The two subarrays are:
-
-```text
-[2,2,6]
-[6]
-```
-
-Store:
-
-```text
-map = {
-    0 : 1,
-    4 : 2,
-    6 : 1,
-    2 : 1
-}
-```
-
----
-
-## Index 4
-
-```text
-num = 4
-```
-
-```text
-prefixXor = 2 ^ 4
-          = 6
-```
-
-Required:
-
-```text
-6 ^ 6 = 0
-```
-
-`0` appears once.
-
-Therefore:
-
-```text
 count = 4
 ```
 
-This gives:
+Possible `j` values:
 
 ```text
-[4,2,2,6,4]
-```
-
-because the XOR of the entire array is:
-
-```text
-4 ^ 2 ^ 2 ^ 6 ^ 4 = 6
+j = 3
+j = 4
 ```
 
 ---
 
-# Final Answer
+## Final Answer
 
 ```text
 4
@@ -384,114 +395,157 @@ because the XOR of the entire array is:
 
 ---
 
-# Why `map.put(0, 1)`?
+# Understanding One Valid Case
 
-This line is very important:
-
-```java
-map.put(0, 1);
-```
-
-It represents a prefix XOR of `0` **before the array starts**.
-
-For example:
+Take:
 
 ```text
-nums = [6]
-k = 6
+i = 0
+k = 2
 ```
 
-At the first element:
+We found:
 
 ```text
-prefixXor = 6
+2 ^ 3 ^ 1 = 0
 ```
-
-Required:
-
-```text
-6 ^ 6 = 0
-```
-
-Because `0` is already in the map:
-
-```text
-count += 1
-```
-
-So `[6]` is correctly counted.
-
----
-
-# Why Store Frequency?
-
-This problem asks for the **number of subarrays**.
-
-A particular prefix XOR can occur multiple times.
-
-For example:
-
-```text
-prefixXor = 4
-```
-
-appears `2` times.
-
-If:
-
-```text
-required = 4
-```
-
-then both occurrences can produce valid subarrays.
 
 Therefore:
 
-```java
-count += map.get(required);
+```text
+a ^ b = 0
 ```
 
-We add the **frequency**, not just `1`.
-
----
-
-# Difference From Sum K
-
-For:
-
-### Subarray Sum K
+which means:
 
 ```text
-previousSum = prefixSum - k
+a = b
 ```
 
-### Subarray XOR K
+Possible `j` values:
 
 ```text
-previousXor = prefixXor ^ k
+j = 1
+j = 2
+```
+
+### j = 1
+
+```text
+a = [2]
+
+b = [3,1]
+```
+
+```text
+2
+```
+
+and:
+
+```text
+3 ^ 1 = 2
 ```
 
 So:
 
 ```text
-SUM:
-prefixSum - k
-
-XOR:
-prefixXor ^ k
+a = b
 ```
 
-Both use the same overall pattern:
+Valid triplet:
 
 ```text
-Prefix
-   ↓
-Find required previous value
-   ↓
-HashMap
-   ↓
-Add frequency
+(0,1,2)
 ```
+
+### j = 2
+
+```text
+a = [2,3]
+
+b = [1]
+```
+
+```text
+2 ^ 3 = 1
+```
+
+So again:
+
+```text
+a = b
+```
+
+Valid triplet:
+
+```text
+(0,2,2)
+```
+
+That's why one zero-XOR range can produce multiple triplets.
+
+---
+
+# Why XOR = 0 Is Enough
+
+We have:
+
+```text
+a == b
+```
+
+XOR both sides with `b`:
+
+```text
+a ^ b = b ^ b
+```
+
+Since:
+
+```text
+b ^ b = 0
+```
+
+we get:
+
+```text
+a ^ b = 0
+```
+
+And `a ^ b` is exactly the XOR of the entire range from `i` to `k`.
+
+Therefore:
+
+```text
+Total XOR from i to k = 0
+```
+
+is the condition we need.
+
+---
+
+# Key Formula
+
+The most important formula is:
+
+```text
+If XOR(i ... k) == 0
+
+then:
+
+count += k - i
+```
+
+Why?
+
+Because every:
+
+```text
+i < j <= k
+```
+
+produces a valid triplet.
 
 ---
 
@@ -499,71 +553,74 @@ Add frequency
 
 ### Time Complexity
 
-```text
-O(n)
-```
+We use two nested loops:
 
-We traverse the array once.
+```text
+O(n²)
+```
 
 ### Space Complexity
 
-```text
-O(n)
-```
+Only a few variables are used:
 
-The HashMap can store up to `n` different prefix XOR values.
+```text
+O(1)
+```
 
 ---
 
-# Key Takeaway
+# Common Mistake
 
-Remember this formula:
-
-```text
-Previous XOR ^ Current XOR = K
-```
-
-Therefore:
+Do **not** confuse this problem with the classic:
 
 ```text
-Previous XOR = Current XOR ^ K
+Count Subarrays With XOR K
 ```
 
-So the main line is:
+Here there is **no given K**.
 
-```java
-int required = prefixXor ^ k;
-```
-
-Then:
-
-```java
-count += map.getOrDefault(required, 0);
-```
-
-And finally store the current prefix XOR:
-
-```java
-map.put(
-    prefixXor,
-    map.getOrDefault(prefixXor, 0) + 1
-);
-```
-
-## 🧠 Pattern
+The condition is:
 
 ```text
-Array
-  ↓
-Prefix XOR
-  ↓
-prefixXor ^ K
-  ↓
-Search in HashMap
-  ↓
-Add frequency
-  ↓
-Store prefix XOR
+a == b
 ```
 
-**Prefix XOR + HashMap → O(n) Time | O(n) Space**
+which becomes:
+
+```text
+XOR(i ... k) == 0
+```
+
+So the key is:
+
+```text
+No K
+   ↓
+Find zero XOR ranges
+   ↓
+For every zero XOR range
+   ↓
+Add k - i
+```
+
+---
+
+# 🧠 Remember
+
+```text
+a == b
+  ↓
+a ^ b = 0
+  ↓
+XOR(i ... k) = 0
+  ↓
+Every j between i+1 and k works
+  ↓
+count += k - i
+```
+
+### One-line memory trick
+
+> **When the XOR of the whole range `i...k` is zero, all `k-i` possible middle positions `j` form valid triplets.**
+
+**Two Pointers/Loops + Running XOR → O(n²) Time | O(1) Space**
