@@ -1,273 +1,359 @@
-# 3Sum
+# Binary Search
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+[LeetCode 704 — Binary Search](https://leetcode.com/problems/binary-search/)
 
 ---
 
 ## Problem
 
-Given an integer array `nums`, return all the unique triplets:
+Given an array of integers `nums` sorted in ascending order and an integer `target`, return the index of `target`.
+
+If `target` does not exist in the array, return:
 
 ```text
-nums[i] + nums[j] + nums[k] = 0
+-1
 ```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
 
 ### Example
 
 **Input:**
 
 ```text
-nums = [-1, 0, 1, 2, -1, -4]
+nums = [-1,0,3,5,9,12]
+target = 9
 ```
 
 **Output:**
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+4
 ```
 
 Because:
 
 ```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
+nums[4] = 9
 ```
 
 ---
 
-## Solution
+# Optimal Approach: Binary Search
 
-### Optimal Approach: Sorting + Two Pointers
+Since the array is already **sorted**, we don't need to check every element.
 
-First, sort the array.
+We look at the **middle element**.
 
-```text
-[-1, 0, 1, 2, -1, -4]
-```
-
-becomes:
+### Three possibilities
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+1. nums[mid] == target
+   → Found the target
+
+2. nums[mid] < target
+   → Target must be on the RIGHT
+
+3. nums[mid] > target
+   → Target must be on the LEFT
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
-
-```text
-sum = nums[i] + nums[left] + nums[right]
-```
-
-### Three Cases
-
-If:
-
-```text
-sum < 0
-```
-
-The sum is too small, so increase `left`:
-
-```text
-left++
-```
-
-If:
-
-```text
-sum > 0
-```
-
-The sum is too large, so decrease `right`:
-
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
-
-
-
-## Dry Run
-
-### Input
-
-```text
-nums = [-1, 0, 1, 2, -1, -4]
-```
-
-### Step 1: Sort
-
-```text
-[-4, -1, -1, 0, 1, 2]
-```
+Every step removes approximately half of the search space.
 
 ---
 
-### Step 2: Fix `-4`
+## Pointers
+
+We use two pointers:
 
 ```text
-i = -4
-left = -1
-right = 2
+left
+right
+```
+
+Initially:
+
+```text
+left = 0
+right = nums.length - 1
 ```
 
 Calculate:
 
 ```text
--4 + (-1) + 2 = -3
+mid = left + (right - left) / 2
+```
+
+---
+
+# Steps
+
+```text
+1. Set left = 0.
+2. Set right = n - 1.
+3. Find the middle index.
+4. Compare nums[mid] with target.
+5. If equal → return mid.
+6. If target is greater → search right half.
+7. If target is smaller → search left half.
+8. If left becomes greater than right → target doesn't exist.
+9. Return -1.
+```
+
+
+
+---
+
+# Dry Run
+
+### Input
+
+```text
+nums = [-1,0,3,5,9,12]
+target = 9
+```
+
+Array with indices:
+
+```text
+Index:  0   1   2   3   4   5
+        ↓   ↓   ↓   ↓   ↓   ↓
+       -1   0   3   5   9  12
+```
+
+Initially:
+
+```text
+left = 0
+right = 5
+```
+
+---
+
+## Step 1
+
+Calculate:
+
+```text
+mid = 0 + (5 - 0) / 2
+    = 2
+```
+
+So:
+
+```text
+nums[mid] = nums[2] = 3
+```
+
+Compare:
+
+```text
+3 vs 9
 ```
 
 Since:
 
 ```text
--3 < 0
+3 < 9
 ```
 
-Move `left` forward.
+the target must be on the **right side**.
 
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
+So:
 
 ```text
-i = -1
-left = -1
-right = 2
+left = mid + 1
+left = 3
 ```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
 
 Now:
 
 ```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
+left = 3
+right = 5
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
+## Step 2
 
-There are two `-1`s:
+Calculate:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
+mid = 3 + (5 - 3) / 2
+    = 4
 ```
-
-If we fix the second `-1` again, we could generate duplicate triplets.
 
 So:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+nums[4] = 9
 ```
 
-skips it.
-
----
-
-## Final Answer
+Compare:
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+9 == 9
+```
+
+Found! ✅
+
+Return:
+
+```text
+4
 ```
 
 ---
 
-## Complexity Analysis
+# Visualize Binary Search
 
-### Time Complexity: O(n²)
+```text
+[-1, 0, 3, 5, 9, 12]
+          ↑
+         mid
+```
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
+`3 < 9`, so ignore the left side:
+
+```text
+[-1, 0, 3] | [5, 9, 12]
+               ↑
+              search
+```
+
+Now middle:
+
+```text
+[5, 9, 12]
+     ↑
+    mid
+```
+
+Found `9`.
+
+---
+
+# Why Is It O(log n)?
+
+Suppose there are:
+
+```text
+16 elements
+```
+
+After every comparison:
+
+```text
+16 → 8 → 4 → 2 → 1
+```
+
+We keep cutting the search space in half.
 
 Therefore:
 
 ```text
-O(n²)
+Time Complexity = O(log n)
 ```
-
-### Space Complexity: O(1)
-
-Ignoring the output, we use only constant extra space.
 
 ---
 
-## Key Takeaway
+# Complexity Analysis
 
-The main pattern is:
+### Time Complexity
 
 ```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
+O(log n)
 ```
+
+Because the search space is divided by 2 each time.
+
+### Space Complexity
+
+```text
+O(1)
+```
+
+Only `left`, `right`, and `mid` are used.
+
+---
+
+# Important Conditions
+
+### Target is greater than middle
+
+```java
+if (nums[mid] < target) {
+    left = mid + 1;
+}
+```
+
+Search:
+
+```text
+RIGHT
+```
+
+### Target is smaller than middle
+
+```java
+else {
+    right = mid - 1;
+}
+```
+
+Search:
+
+```text
+LEFT
+```
+
+### Target found
+
+```java
+if (nums[mid] == target) {
+    return mid;
+}
+```
+
+---
+
+# 🧠 Key Takeaway
+
+Binary Search works because the array is **sorted**.
 
 Remember:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+              middle
+                ↓
+        ┌───────┴───────┐
+        ↓               ↓
+     smaller           bigger
+        ↓               ↓
+      LEFT             RIGHT
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+The complete pattern:
+
+```text
+Sorted Array
+     ↓
+Find Middle
+     ↓
+Compare Target
+     ↓
+┌───────────────┐
+│               │
+Equal         Not Equal
+│               │
+Found      Eliminate half
+                ↓
+             Repeat
+```
+
+### One-line memory trick
+
+> **If target > middle, go right. If target < middle, go left.**
+
+**Binary Search → O(log n) Time | O(1) Space**
