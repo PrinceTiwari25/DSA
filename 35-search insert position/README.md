@@ -1,273 +1,503 @@
-# 3Sum
+# LC 35 — Search Insert Position
 
-## LeetCode Problem
+## 🔗 Problem Link
 
-[3Sum](https://leetcode.com/problems/3sum/)
-
----
-
-## Problem
-
-Given an integer array `nums`, return all the unique triplets:
-
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
-
-### Example
-
-**Input:**
-
-```text
-nums = [-1, 0, 1, 2, -1, -4]
-```
-
-**Output:**
-
-```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
-```
-
-Because:
-
-```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
-```
+https://leetcode.com/problems/search-insert-position/
 
 ---
 
-## Solution
+## 📝 Question
 
-### Optimal Approach: Sorting + Two Pointers
+Given a **sorted array of distinct integers** `nums` and a `target` value:
 
-First, sort the array.
+- If `target` exists in the array, return its index.
+- If `target` does not exist, return the index where it should be inserted so that the array remains sorted.
+
+### Example 1
 
 ```text
-[-1, 0, 1, 2, -1, -4]
+Input:
+nums = [1,3,5,6]
+target = 5
+
+Output:
+2
 ```
 
-becomes:
+Because `5` is present at index `2`.
+
+---
+
+### Example 2
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+Input:
+nums = [1,3,5,6]
+target = 2
+
+Output:
+1
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+Because inserting `2` at index `1` gives:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
-```
-
-### Three Cases
-
-If:
-
-```text
-sum < 0
-```
-
-The sum is too small, so increase `left`:
-
-```text
-left++
-```
-
-If:
-
-```text
-sum > 0
-```
-
-The sum is too large, so decrease `right`:
-
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
-
-
-
-## Dry Run
-
-### Input
-
-```text
-nums = [-1, 0, 1, 2, -1, -4]
-```
-
-### Step 1: Sort
-
-```text
-[-4, -1, -1, 0, 1, 2]
+[1,2,3,5,6]
+   ↑
+ index 1
 ```
 
 ---
 
-### Step 2: Fix `-4`
+### Example 3
 
 ```text
-i = -4
-left = -1
-right = 2
+Input:
+nums = [1,3,5,6]
+target = 7
+
+Output:
+4
 ```
 
-Calculate:
+Because `7` should be inserted at the end:
 
 ```text
--4 + (-1) + 2 = -3
-```
-
-Since:
-
-```text
--3 < 0
-```
-
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
-
-```text
-i = -1
-left = -1
-right = 2
-```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
-
-Now:
-
-```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
+[1,3,5,6,7]
+         ↑
+       index 4
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
+# 🚀 Optimal Approach — Binary Search / Lower Bound
 
-There are two `-1`s:
+Since the array is already **sorted**, we can use **Binary Search**.
 
-```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
-```
+This problem follows the **Lower Bound** pattern.
 
-If we fix the second `-1` again, we could generate duplicate triplets.
+## What is Lower Bound?
 
-So:
+Lower Bound means:
 
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
-```
-
-skips it.
-
----
-
-## Final Answer
+> Find the **first index** where the element is greater than or equal to the target.
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+nums[index] >= target
 ```
 
----
+For example:
 
-## Complexity Analysis
+```text
+nums   = [1,3,5,6]
+target = 4
+```
 
-### Time Complexity: O(n²)
+Check:
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
+```text
+1 < 4
+3 < 4
+5 >= 4  ← first element >= 4
+6 >= 4
+```
 
 Therefore:
 
 ```text
-O(n²)
+Lower Bound = index 2
 ```
 
-### Space Complexity: O(1)
-
-Ignoring the output, we use only constant extra space.
+And `4` should be inserted at index `2`.
 
 ---
 
-## Key Takeaway
+# 💡 Main Idea
 
-The main pattern is:
-
-```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
-```
-
-Remember:
+We maintain two pointers:
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+left  → beginning of search space
+right → end of search space
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+Then calculate the middle index:
+
+```text
+mid
+```
+
+There are two important cases.
+
+---
+
+## Case 1: Middle Element >= Target
+
+```text
+nums[mid] >= target
+```
+
+This means `mid` **could be our answer**.
+
+But there might be an earlier valid position on the left.
+
+Therefore:
+
+```text
+Save mid as possible answer
+        ↓
+Move LEFT
+```
+
+---
+
+## Case 2: Middle Element < Target
+
+```text
+nums[mid] < target
+```
+
+The middle element is too small.
+
+Because the array is sorted, everything before it is also too small.
+
+Therefore:
+
+```text
+Move RIGHT
+```
+
+---
+
+# 🔍 Dry Run
+
+Consider:
+
+```text
+nums = [1,3,5,6]
+target = 4
+```
+
+Array with indices:
+
+```text
+Index:    0   1   2   3
+          ↓   ↓   ↓   ↓
+nums =   [1,  3,  5,  6]
+```
+
+We need to find the first position where:
+
+```text
+nums[index] >= 4
+```
+
+---
+
+## Step 1
+
+Initially:
+
+```text
+left  = 0
+right = 3
+```
+
+Middle:
+
+```text
+mid = 1
+```
+
+Element:
+
+```text
+nums[1] = 3
+```
+
+Compare:
+
+```text
+3 < 4
+```
+
+`3` is too small.
+
+Therefore, the answer must be on the **right**.
+
+```text
+left = 2
+```
+
+Search space becomes:
+
+```text
+[1,3 | 5,6]
+       ↑
+   search here
+```
+
+---
+
+## Step 2
+
+Now:
+
+```text
+left  = 2
+right = 3
+```
+
+Middle:
+
+```text
+mid = 2
+```
+
+Element:
+
+```text
+nums[2] = 5
+```
+
+Compare:
+
+```text
+5 >= 4
+```
+
+So index `2` is a **possible answer**.
+
+```text
+answer = 2
+```
+
+But we want the **first** position where:
+
+```text
+nums[index] >= target
+```
+
+Therefore, we try searching further left.
+
+```text
+right = 1
+```
+
+---
+
+## Step 3
+
+Now:
+
+```text
+left  = 2
+right = 1
+```
+
+We have:
+
+```text
+left > right
+```
+
+So Binary Search stops.
+
+---
+
+# ✅ Final Answer
+
+```text
+2
+```
+
+Why?
+
+Because `4` should be inserted here:
+
+```text
+Before:
+
+[1,3,5,6]
+     ↑
+   index 2
+```
+
+After inserting:
+
+```text
+[1,3,4,5,6]
+     ↑
+     4
+```
+
+The array remains sorted.
+
+---
+
+# 🧠 Another Dry Run — Target Exists
+
+```text
+nums = [1,3,5,6]
+target = 5
+```
+
+We need:
+
+```text
+first element >= 5
+```
+
+Check:
+
+```text
+1 < 5
+3 < 5
+5 >= 5  ✅
+```
+
+Therefore:
+
+```text
+answer = 2
+```
+
+Notice that Lower Bound uses:
+
+```text
+>=
+```
+
+not just:
+
+```text
+>
+```
+
+So if the target already exists, its position can be returned.
+
+---
+
+# 🧠 Another Case — Target Is Largest
+
+```text
+nums = [1,3,5,6]
+target = 7
+```
+
+Every element is smaller than `7`:
+
+```text
+1 < 7
+3 < 7
+5 < 7
+6 < 7
+```
+
+So `7` should be inserted after all elements:
+
+```text
+[1,3,5,6,7]
+         ↑
+```
+
+Answer:
+
+```text
+4
+```
+
+which is equal to:
+
+```text
+nums.length
+```
+
+---
+
+# ⏱️ Complexity Analysis
+
+## Time Complexity
+
+```text
+O(log n)
+```
+
+Binary Search eliminates half of the search space after every step.
+
+For example:
+
+```text
+16 → 8 → 4 → 2 → 1
+```
+
+---
+
+## Space Complexity
+
+```text
+O(1)
+```
+
+We only need a few variables.
+
+---
+
+# 🔑 Key Takeaway
+
+The most important condition is:
+
+```text
+nums[mid] >= target
+```
+
+If true:
+
+```text
+Possible Answer
+      ↓
+Save position
+      ↓
+Move LEFT
+```
+
+If false:
+
+```text
+nums[mid] < target
+      ↓
+Too small
+      ↓
+Move RIGHT
+```
+
+---
+
+# 🧠 Remember This Pattern
+
+```text
+              nums[mid]
+                  ↓
+          Compare with target
+             /         \
+            /           \
+ nums[mid] >= target   nums[mid] < target
+          ↓                    ↓
+   Possible Answer          Too Small
+          ↓                    ↓
+      Move LEFT            Move RIGHT
+```
+
+### One-Line Memory Trick
+
+> **LC 35 asks for the first position where `nums[index] >= target`.**
+
+```text
+LC 35 Search Insert Position
+          =
+      Lower Bound
+          =
+First index where nums[i] >= target
+```
+
+**Binary Search → O(log n) Time | O(1) Space**
