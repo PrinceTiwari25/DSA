@@ -1,273 +1,388 @@
-# 3Sum
+# LC 11 — Container With Most Water
 
-## LeetCode Problem
+## 🔗 LeetCode
 
-[3Sum](https://leetcode.com/problems/3sum/)
-
----
-
-## Problem
-
-Given an integer array `nums`, return all the unique triplets:
-
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
-
-### Example
-
-**Input:**
-
-```text
-nums = [-1, 0, 1, 2, -1, -4]
-```
-
-**Output:**
-
-```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
-```
-
-Because:
-
-```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
-```
+https://leetcode.com/problems/container-with-most-water/
 
 ---
 
-## Solution
+# 📝 Question
 
-### Optimal Approach: Sorting + Two Pointers
+You are given an integer array `height` where:
 
-First, sort the array.
+- `height[i]` represents the height of a vertical line.
+- The width between two lines is the difference between their indices.
+
+Choose **two lines** that, together with the x-axis, form a container that holds the **most water**.
+
+Return the **maximum amount of water** the container can store.
+
+### Example 1
 
 ```text
-[-1, 0, 1, 2, -1, -4]
+Input:
+height = [1,8,6,2,5,4,8,3,7]
+
+Output:
+49
 ```
 
-becomes:
+The two lines with heights `8` and `7` form the container that holds the maximum water.
+
+---
+
+# 🚀 Optimal Approach — Two Pointers
+
+Instead of checking every possible pair of lines, use **two pointers**.
+
+Initialize:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+lp = 0
+rp = height.length - 1
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+So:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
-```
-
-### Three Cases
-
-If:
-
-```text
-sum < 0
-```
-
-The sum is too small, so increase `left`:
-
-```text
-left++
-```
-
-If:
-
-```text
-sum > 0
-```
-
-The sum is too large, so decrease `right`:
-
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
-
-
-
-## Dry Run
-
-### Input
-
-```text
-nums = [-1, 0, 1, 2, -1, -4]
-```
-
-### Step 1: Sort
-
-```text
-[-4, -1, -1, 0, 1, 2]
+lp → leftmost line
+rp → rightmost line
 ```
 
 ---
 
-### Step 2: Fix `-4`
+## 💧 Calculate Water
+
+For every pair of pointers:
+
+### Height of container
+
+The water level is limited by the **shorter line**.
 
 ```text
-i = -4
-left = -1
-right = 2
+h = min(height[lp], height[rp])
 ```
 
-Calculate:
+### Width of container
 
 ```text
--4 + (-1) + 2 = -3
+w = rp - lp
+```
+
+### Current water
+
+```text
+currentwater = h × w
+```
+
+Update the maximum:
+
+```text
+maxwater = max(maxwater, currentwater)
+```
+
+---
+
+# 🔄 How Do We Move the Pointers?
+
+This is the most important part.
+
+If:
+
+```text
+height[lp] < height[rp]
+```
+
+Move the left pointer:
+
+```text
+lp++
+```
+
+Otherwise:
+
+```text
+rp--
+```
+
+### Why?
+
+The amount of water depends on:
+
+```text
+min(height[lp], height[rp]) × width
+```
+
+If the left line is shorter, keeping it while reducing the width cannot give us a better container.
+
+So we move the **shorter line** and try to find a taller one.
+
+---
+
+# 🔍 Dry Run — Example 1
+
+```text
+height = [1,8,6,2,5,4,8,3,7]
+```
+
+Indices:
+
+```text
+ 0  1  2  3  4  5  6  7  8
+[1, 8, 6, 2, 5, 4, 8, 3, 7]
+ ↑                          ↑
+lp                          rp
+```
+
+Initially:
+
+```text
+lp = 0
+rp = 8
+maxwater = 0
+```
+
+---
+
+## Step 1
+
+```text
+height[lp] = 1
+height[rp] = 7
+```
+
+Height:
+
+```text
+h = min(1,7) = 1
+```
+
+Width:
+
+```text
+w = 8 - 0 = 8
+```
+
+Water:
+
+```text
+currentwater = 1 × 8 = 8
+```
+
+Update:
+
+```text
+maxwater = 8
 ```
 
 Since:
 
 ```text
--3 < 0
+height[lp] < height[rp]
+1 < 7
 ```
 
-Move `left` forward.
-
-No valid triplet is found with `-4`.
-
----
-
-### Step 3: Fix `-1`
+Move left pointer:
 
 ```text
-i = -1
-left = -1
-right = 2
+lp++
 ```
-
-Calculate:
-
-```text
--1 + (-1) + 2 = 0
-```
-
-Found:
-
-```text
-[-1, -1, 2]
-```
-
-Move both pointers.
 
 Now:
 
 ```text
--1 + 0 + 1 = 0
-```
-
-Found:
-
-```text
-[-1, 0, 1]
+lp = 1
+rp = 8
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
+## Step 2
 
 ```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
+height[lp] = 8
+height[rp] = 7
 ```
 
-If we fix the second `-1` again, we could generate duplicate triplets.
-
-So:
-
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+h = min(8,7) = 7
+w = 8 - 1 = 7
 ```
 
-skips it.
+```text
+currentwater = 7 × 7 = 49
+```
+
+Update:
+
+```text
+maxwater = 49
+```
+
+Now:
+
+```text
+height[lp] < height[rp]
+8 < 7 ❌
+```
+
+So move the right pointer:
+
+```text
+rp--
+```
+
+Now:
+
+```text
+lp = 1
+rp = 7
+```
 
 ---
 
-## Final Answer
+## Step 3
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+height[lp] = 8
+height[rp] = 3
+```
+
+```text
+h = min(8,3) = 3
+w = 7 - 1 = 6
+```
+
+```text
+currentwater = 3 × 6 = 18
+```
+
+`18` is smaller than `49`.
+
+```text
+maxwater = 49
+```
+
+Since:
+
+```text
+8 < 3 ❌
+```
+
+Move right:
+
+```text
+rp--
+```
+
+Now:
+
+```text
+lp = 1
+rp = 6
 ```
 
 ---
 
-## Complexity Analysis
+## Remaining Steps
 
-### Time Complexity: O(n²)
+Following the exact same logic:
 
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
+| `lp` | `rp` | `height[lp]` | `height[rp]` | Width | Water | `maxwater` |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 8 | 1 | 7 | 8 | 8 | 8 |
+| 1 | 8 | 8 | 7 | 7 | **49** | **49** |
+| 1 | 7 | 8 | 3 | 6 | 18 | 49 |
+| 1 | 6 | 8 | 8 | 5 | 40 | 49 |
+| 1 | 5 | 8 | 4 | 4 | 16 | 49 |
+| 1 | 4 | 8 | 5 | 3 | 15 | 49 |
+| 1 | 3 | 8 | 2 | 2 | 4 | 49 |
+| 1 | 2 | 8 | 6 | 1 | 6 | 49 |
+
+Eventually:
+
+```text
+rp <= lp
+```
+
+The loop stops.
+
+---
+
+# ✅ Final Answer
+
+```text
+49
+```
+
+The maximum container is formed by:
+
+```text
+height[1] = 8
+height[8] = 7
+```
+
+Width:
+
+```text
+8 - 1 = 7
+```
+
+Height:
+
+```text
+min(8,7) = 7
+```
 
 Therefore:
 
 ```text
-O(n²)
+Water = 7 × 7
+      = 49
 ```
-
-### Space Complexity: O(1)
-
-Ignoring the output, we use only constant extra space.
 
 ---
 
-## Key Takeaway
+# ⏱️ Complexity
 
-The main pattern is:
-
-```text
-Sort
-  ↓
-Fix one element
-  ↓
-Use Two Pointers
-  ↓
-Calculate 3 numbers
-```
-
-Remember:
+### Time Complexity
 
 ```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
+O(n)
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+Each pointer moves from one side toward the other only once.
+
+### Space Complexity
+
+```text
+O(1)
+```
+
+Only a few variables are used.
+
+---
+
+# 🔑 Key Takeaway
+
+Remember the main formula:
+
+```text
+Water = min(left height, right height) × (right index - left index)
+```
+
+And the main pointer rule:
+
+```text
+If left height < right height:
+        move left pointer
+
+Else:
+        move right pointer
+```
+
+### One-Line Memory Trick
+
+> **Calculate water → update maximum → move the shorter line.**
+
+This gives the optimal **Two Pointer** solution in `O(n)` time.
