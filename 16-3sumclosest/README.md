@@ -1,273 +1,515 @@
-# 3Sum
+# LC 16 — 3Sum Closest
 
-## LeetCode Problem
+## 🔗 LeetCode
 
-[3Sum](https://leetcode.com/problems/3sum/)
-
----
-
-## Problem
-
-Given an integer array `nums`, return all the unique triplets:
-
-```text
-nums[i] + nums[j] + nums[k] = 0
-```
-
-The indices `i`, `j`, and `k` must be different.
-
-The solution must not contain duplicate triplets.
-
-### Example
-
-**Input:**
-
-```text
-nums = [-1, 0, 1, 2, -1, -4]
-```
-
-**Output:**
-
-```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
-```
-
-Because:
-
-```text
--1 + -1 + 2 = 0
--1 + 0 + 1 = 0
-```
+https://leetcode.com/problems/3sum-closest/
 
 ---
 
-## Solution
+# 📝 Question
 
-### Optimal Approach: Sorting + Two Pointers
+Given an integer array `nums` of length `n` and an integer `target`, find three integers in `nums` such that their sum is **closest to the target**.
 
-First, sort the array.
+Return the sum of the three integers.
+
+You may assume that each input has exactly one solution.
+
+---
+
+## Example 1
 
 ```text
-[-1, 0, 1, 2, -1, -4]
+Input:
+nums = [-1,2,1,-4]
+target = 1
+
+Output:
+2
+```
+
+### Explanation
+
+The possible three-number sums include:
+
+```text
+(-1) + 2 + 1 = 2
+(-1) + 2 + (-4) = -3
+(-1) + 1 + (-4) = -4
+2 + 1 + (-4) = -1
+```
+
+The target is:
+
+```text
+1
+```
+
+The closest sum is:
+
+```text
+2
+```
+
+because:
+
+```text
+|2 - 1| = 1
+```
+
+---
+
+# 🚀 Optimal Approach — Sorting + Two Pointers
+
+The optimal approach is based on the **3Sum two-pointer technique**.
+
+### Step 1 — Sort the array
+
+First sort the array.
+
+For the example:
+
+```text
+Original:
+[-1, 2, 1, -4]
+
+After sorting:
+[-4, -1, 1, 2]
+```
+
+Sorting allows us to decide how to move the pointers.
+
+---
+
+### Step 2 — Fix One Element
+
+Use a loop to fix the first element.
+
+Call its index `i`.
+
+For every fixed `i`, use two pointers:
+
+```text
+j = i + 1
+k = last index
+```
+
+So we have:
+
+```text
+nums[i] + nums[j] + nums[k]
+```
+
+---
+
+### Step 3 — Calculate Current Sum
+
+For every combination:
+
+```text
+currentSum = nums[i] + nums[j] + nums[k]
+```
+
+Compare it with the target.
+
+We want the sum having the smallest difference:
+
+```text
+|currentSum - target|
+```
+
+Keep this sum as `closestSum`.
+
+---
+
+# 🔄 Pointer Movement
+
+There are three cases.
+
+### Case 1 — Current Sum = Target
+
+```text
+currentSum == target
+```
+
+This is the best possible answer.
+
+The difference is:
+
+```text
+0
+```
+
+So immediately return the current sum.
+
+---
+
+### Case 2 — Current Sum < Target
+
+```text
+currentSum < target
+```
+
+The sum is too small.
+
+Because the array is sorted, increase the sum by moving the left pointer:
+
+```text
+j++
+```
+
+---
+
+### Case 3 — Current Sum > Target
+
+```text
+currentSum > target
+```
+
+The sum is too large.
+
+Decrease the sum by moving the right pointer:
+
+```text
+k--
+```
+
+---
+
+# 🔍 Dry Run — Example 1
+
+### Input
+
+```text
+nums = [-1,2,1,-4]
+target = 1
+```
+
+---
+
+## Step 1 — Sort
+
+```text
+[-1, 2, 1, -4]
 ```
 
 becomes:
 
 ```text
-[-4, -1, -1, 0, 1, 2]
+[-4, -1, 1, 2]
 ```
 
-Then use three positions:
-
-- `i` → fixed element
-- `left` → starts at `i + 1`
-- `right` → starts at the last index
-
-For every fixed `nums[i]`, calculate:
+We start with:
 
 ```text
-sum = nums[i] + nums[left] + nums[right]
-```
-
-### Three Cases
-
-If:
-
-```text
-sum < 0
-```
-
-The sum is too small, so increase `left`:
-
-```text
-left++
-```
-
-If:
-
-```text
-sum > 0
-```
-
-The sum is too large, so decrease `right`:
-
-```text
-right--
-```
-
-If:
-
-```text
-sum == 0
-```
-
-We found a valid triplet.
-
-Then move both pointers and skip duplicate values.
-
-### Duplicate Handling
-
-Since the array is sorted, duplicate values are next to each other.
-
-We skip duplicate `i`, `left`, and `right` values so that the result contains only unique triplets.
-
-
-
-## Dry Run
-
-### Input
-
-```text
-nums = [-1, 0, 1, 2, -1, -4]
-```
-
-### Step 1: Sort
-
-```text
-[-4, -1, -1, 0, 1, 2]
+closestSum = -4 + (-1) + 1
+           = -4
 ```
 
 ---
 
-### Step 2: Fix `-4`
+# Step 2 — Fix `i = 0`
 
 ```text
-i = -4
-left = -1
-right = 2
+i = 0
+nums[i] = -4
+```
+
+Pointers:
+
+```text
+        i   j       k
+        ↓   ↓       ↓
+nums = [-4,-1,  1,  2]
+```
+
+```text
+j = 1
+k = 3
 ```
 
 Calculate:
 
 ```text
--4 + (-1) + 2 = -3
+currentSum = -4 + (-1) + 2
+            = -3
+```
+
+Compare with target:
+
+```text
+target = 1
+```
+
+Difference:
+
+```text
+|-3 - 1| = 4
+```
+
+Previous:
+
+```text
+|-4 - 1| = 5
+```
+
+So:
+
+```text
+closestSum = -3
 ```
 
 Since:
 
 ```text
--3 < 0
+-3 < 1
 ```
 
-Move `left` forward.
+move `j` forward:
 
-No valid triplet is found with `-4`.
+```text
+j++
+```
 
 ---
 
-### Step 3: Fix `-1`
+## Step 3
+
+Now:
 
 ```text
-i = -1
-left = -1
-right = 2
+i = 0
+j = 2
+k = 3
+```
+
+```text
+        i       j   k
+        ↓       ↓   ↓
+nums = [-4, -1, 1, 2]
 ```
 
 Calculate:
 
 ```text
--1 + (-1) + 2 = 0
+currentSum = -4 + 1 + 2
+            = -1
 ```
 
-Found:
+Difference:
 
 ```text
-[-1, -1, 2]
+|-1 - 1| = 2
 ```
 
-Move both pointers.
+Previous difference:
+
+```text
+|-3 - 1| = 4
+```
+
+So:
+
+```text
+closestSum = -1
+```
+
+Again:
+
+```text
+-1 < 1
+```
+
+Therefore:
+
+```text
+j++
+```
 
 Now:
 
 ```text
--1 + 0 + 1 = 0
+j = 3
+k = 3
 ```
 
-Found:
+Since:
 
 ```text
-[-1, 0, 1]
+j < k
+```
+
+is false, this two-pointer search ends.
+
+---
+
+# Step 4 — Fix `i = 1`
+
+Now:
+
+```text
+i = 1
+nums[i] = -1
+```
+
+Set:
+
+```text
+j = 2
+k = 3
+```
+
+```text
+        i   j   k
+        ↓   ↓   ↓
+nums = [-4,-1, 1, 2]
+```
+
+Calculate:
+
+```text
+currentSum = -1 + 1 + 2
+            = 2
+```
+
+Difference from target:
+
+```text
+|2 - 1| = 1
+```
+
+Previous closest difference:
+
+```text
+|-1 - 1| = 2
+```
+
+So update:
+
+```text
+closestSum = 2
+```
+
+Now:
+
+```text
+2 > 1
+```
+
+Therefore move the right pointer:
+
+```text
+k--
+```
+
+Now:
+
+```text
+k = 2
+```
+
+Since:
+
+```text
+j < k
+```
+
+is false, this search ends.
+
+---
+
+# Step 5 — Remaining `i`
+
+There are no more useful combinations.
+
+The closest sum found is:
+
+```text
+closestSum = 2
 ```
 
 ---
 
-### Step 4: Skip Duplicate `-1`
-
-There are two `-1`s:
+# ✅ Final Answer
 
 ```text
-[-4, -1, -1, 0, 1, 2]
-     ↑   ↑
+2
 ```
 
-If we fix the second `-1` again, we could generate duplicate triplets.
+Difference from target:
 
-So:
-
-```java
-if (i > 0 && nums[i] == nums[i - 1]) {
-    continue;
-}
+```text
+|2 - 1| = 1
 ```
 
-skips it.
+Therefore, `2` is the closest possible three-number sum.
 
 ---
 
-## Final Answer
+# ⏱️ Complexity
+
+### Time Complexity
+
+Sorting:
 
 ```text
-[
-    [-1, -1, 2],
-    [-1, 0, 1]
-]
+O(n log n)
 ```
 
----
-
-## Complexity Analysis
-
-### Time Complexity: O(n²)
-
-Sorting takes `O(n log n)` and the two-pointer traversal takes `O(n²)` overall.
-
-Therefore:
+Two-pointer search:
 
 ```text
 O(n²)
 ```
 
-### Space Complexity: O(1)
+Overall:
 
-Ignoring the output, we use only constant extra space.
+```text
+O(n²)
+```
+
+### Space Complexity
+
+Ignoring the space used internally by the sorting implementation:
+
+```text
+O(1)
+```
 
 ---
 
-## Key Takeaway
+# 🔑 Key Takeaway
 
-The main pattern is:
+The main idea is:
 
 ```text
 Sort
   ↓
 Fix one element
   ↓
-Use Two Pointers
+Use two pointers for the remaining two
   ↓
-Calculate 3 numbers
+Calculate current sum
+  ↓
+Keep the closest sum
+  ↓
+If sum < target → move left pointer
+If sum > target → move right pointer
 ```
 
-Remember:
+### Remember
 
 ```text
-sum < 0  → left++
+currentSum < target
+        ↓
+      j++
 
-sum > 0  → right--
+currentSum > target
+        ↓
+      k--
 
-sum == 0 → store triplet
+currentSum == target
+        ↓
+   Return immediately
 ```
 
-And always **skip duplicates** to avoid duplicate triplets.
+**LC 16 = 3Sum + Sorting + Two Pointers + Closest Difference**
