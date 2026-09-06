@@ -9,14 +9,14 @@ class Solution {
 
         for (int i = 0; i < n - 3; i++) {
 
-            // Skip duplicate first values
+            
             if (i > 0 && nums[i] == nums[i - 1]) {
                 continue;
             }
 
             for (int j = i + 1; j < n - 2; j++) {
 
-                // Skip duplicate second values
+                
                 if (j > i + 1 && nums[j] == nums[j - 1]) {
                     continue;
                 }
@@ -43,13 +43,13 @@ class Solution {
                         left++;
                         right--;
 
-                        // Skip duplicate left values
+                        
                         while (left < right &&
                                nums[left] == nums[left - 1]) {
                             left++;
                         }
 
-                        // Skip duplicate right values
+                      
                         while (left < right &&
                                nums[right] == nums[right + 1]) {
                             right--;
