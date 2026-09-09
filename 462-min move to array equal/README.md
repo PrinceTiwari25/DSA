@@ -1,8 +1,8 @@
-# LC 453 — Minimum Moves to Equal Array Elements
+# LC 462 — Minimum Moves to Equal Array Elements II
 
-## 🔗 LeetCode
+## 🔗 Question Link
 
-https://leetcode.com/problems/minimum-moves-to-equal-array-elements/
+https://leetcode.com/problems/minimum-moves-to-equal-array-elements-ii/
 
 ---
 
@@ -10,7 +10,7 @@ https://leetcode.com/problems/minimum-moves-to-equal-array-elements/
 
 Given an integer array `nums`, return the **minimum number of moves** required to make all array elements equal.
 
-In one move, you can increment **`n - 1` elements by 1**, where `n` is the size of the array.
+In one move, you can **increment or decrement one element by 1**.
 
 ### Example
 
@@ -19,104 +19,114 @@ Input:
 nums = [1,2,3]
 
 Output:
-3
+2
 ```
 
 ### Explanation
 
-We can make all elements equal to `3`:
+Make all elements equal to `2`:
 
 ```text
 [1,2,3]
 
-Move 1 → [2,3,3]
-Move 2 → [3,4,3]
-Move 3 → [4,4,4]
-```
-
-So the minimum number of moves is:
-
-```text
-3
-```
-
----
-
-# 🚀 Approach to Solve
-
-The important observation is:
-
-> Increasing `n - 1` elements by `1` is equivalent to decreasing the remaining one element by `1`.
-
-So instead of thinking about increasing many elements, we can think about:
-
-**Making every element equal to the smallest element.**
-
-For example:
-
-```text
-nums = [1,2,3]
-```
-
-The minimum element is:
-
-```text
-min = 1
-```
-
-To make all elements equal to `1`:
-
-```text
-1 → needs 0 moves
-2 → needs 1 move
-3 → needs 2 moves
+1 → 2    : 1 move
+2 → 2    : 0 moves
+3 → 2    : 1 move
 ```
 
 Total:
 
 ```text
-0 + 1 + 2 = 3
-```
-
-Therefore:
-
-```text
-moves = Σ(num - min)
+1 + 0 + 1 = 2
 ```
 
 ---
 
-## Steps
+# 🚀 Optimal Approach — Sorting + Median
 
-### Step 1 — Find the minimum element
+The key idea is:
 
-Traverse the entire array and find:
+> To minimize the total number of moves, make all elements equal to the **median**.
 
-```text
-min = smallest element
-```
+### Step 1 — Sort the array
 
-### Step 2 — Calculate the required moves
+First sort the array.
 
-For every element:
+Example:
 
 ```text
-moves += num - min
+[1,2,3]
 ```
 
-Why?
+is already sorted.
 
-Because `num - min` tells us how far that element is from the smallest element.
+For:
 
-### Step 3 — Return `moves`
+```text
+[1,10,2,9]
+```
 
-The total difference gives the minimum number of moves.
+after sorting:
+
+```text
+[1,2,9,10]
+```
+
+---
+
+### Step 2 — Find the Median
+
+The median is the middle element.
+
+For:
+
+```text
+[1,2,3]
+```
+
+the median is:
+
+```text
+2
+```
+
+For an even-sized array, either middle value can be used.
+
+For:
+
+```text
+[1,2,9,10]
+```
+
+the middle values are:
+
+```text
+2 and 9
+```
+
+Both give the minimum total moves.
+
+---
+
+### Step 3 — Calculate Total Moves
+
+For every element, calculate its distance from the median:
+
+```text
+|num - median|
+```
+
+Add all these distances.
+
+```text
+moves = Σ |num - median|
+```
 
 ---
 
 # 🔍 Dry Run
 
-## Input
+### Input
 
 ```text
 nums = [1,2,3]
@@ -124,51 +134,47 @@ nums = [1,2,3]
 
 ---
 
-### Step 1 — Find Minimum
-
-Initially:
+## Step 1 — Sort
 
 ```text
-min = nums[0]
-    = 1
+[1,2,3]
 ```
 
-Traverse the array:
+The array is already sorted.
+
+---
+
+## Step 2 — Find Median
+
+Array:
 
 ```text
-num = 1
-
-min = min(1,1)
-    = 1
+Index:  0  1  2
+        ↓  ↓  ↓
+       [1, 2, 3]
 ```
 
-Next:
+Median:
 
 ```text
-num = 2
+nums[nums.length / 2]
 
-min = min(1,2)
-    = 1
-```
+= nums[3 / 2]
 
-Next:
+= nums[1]
 
-```text
-num = 3
-
-min = min(1,3)
-    = 1
+= 2
 ```
 
 Therefore:
 
 ```text
-min = 1
+median = 2
 ```
 
 ---
 
-### Step 2 — Calculate Moves
+## Step 3 — Calculate Moves
 
 Initially:
 
@@ -176,29 +182,21 @@ Initially:
 moves = 0
 ```
 
-Now calculate `num - min` for every element.
-
 ### For `num = 1`
 
 ```text
-moves += 1 - 1
-      = 0
+|1 - 2| = 1
 ```
 
-So:
-
 ```text
-moves = 0
+moves = 1
 ```
 
 ### For `num = 2`
 
 ```text
-moves += 2 - 1
-      = 1
+|2 - 2| = 0
 ```
-
-So:
 
 ```text
 moves = 1
@@ -207,56 +205,90 @@ moves = 1
 ### For `num = 3`
 
 ```text
-moves += 3 - 1
-      = 2
+|3 - 2| = 1
 ```
 
-So:
-
 ```text
-moves = 3
+moves = 2
 ```
 
 ---
 
 ## 📊 Dry Run Table
 
-| `num` | `min` | `num - min` | `moves` |
-|------:|------:|------------:|--------:|
-| 1 | 1 | 0 | 0 |
-| 2 | 1 | 1 | 1 |
-| 3 | 1 | 2 | 3 |
+| `num` | `median` | `|num - median|` | `moves` |
+|------:|---------:|-----------------:|--------:|
+| 1 | 2 | 1 | 1 |
+| 2 | 2 | 0 | 1 |
+| 3 | 2 | 1 | 2 |
 
 Therefore:
 
 ```text
-Answer = 3
+Answer = 2
 ```
 
 ---
 
-# 🧠 Key Idea
+# 🧠 Why Median?
 
-Instead of actually performing every move, find the **smallest element** and calculate how much larger every other element is compared to it.
-
-```text
-moves = (nums[0] - min)
-      + (nums[1] - min)
-      + ...
-      + (nums[n-1] - min)
-```
-
-For:
+Consider:
 
 ```text
 [1,2,3]
 ```
 
+If we choose `2`:
+
 ```text
-(1-1) + (2-1) + (3-1)
-= 0 + 1 + 2
-= 3
+1 → 2 = 1 move
+2 → 2 = 0 moves
+3 → 2 = 1 move
+
+Total = 2
 ```
+
+If we choose `1`:
+
+```text
+1 → 1 = 0
+2 → 1 = 1
+3 → 1 = 2
+
+Total = 3
+```
+
+If we choose `3`:
+
+```text
+1 → 3 = 2
+2 → 3 = 1
+3 → 3 = 0
+
+Total = 3
+```
+
+So the **median gives the minimum total movement**.
+
+---
+
+# 🔑 Key Takeaway
+
+```text
+Sort the array
+      ↓
+Find the median
+      ↓
+Calculate |num - median|
+      ↓
+Add all distances
+      ↓
+Minimum moves
+```
+
+### Remember
+
+> **LC 462 → Median minimizes the sum of absolute differences.**
 
 ---
 
@@ -265,10 +297,10 @@ For:
 ### Time Complexity
 
 ```text
-O(n)
+O(n log n)
 ```
 
-We traverse the array twice.
+Because sorting takes `O(n log n)`.
 
 ### Space Complexity
 
@@ -276,21 +308,4 @@ We traverse the array twice.
 O(1)
 ```
 
-Only `min` and `moves` variables are used.
-
----
-
-# 🔑 Takeaway
-
-**LC 453 — Minimum Moves to Equal Array Elements**
-
-```text
-Find minimum
-     ↓
-For every number:
-moves += num - minimum
-     ↓
-Return moves
-```
-
-**Time: O(n) | Space: O(1)**
+Auxiliary space, excluding the space used internally by the sorting implementation.
