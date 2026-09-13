@@ -647,51 +647,135 @@ Add current number's bits
 
 ---
 
-# ⏱️ Complexity
+# ⏱️ Complexity Analysis
 
-### Time Complexity
+## Time Complexity — `O(n)`
 
-```text
-O(n)
-```
-
-Although there is a `for` loop containing a `while` loop, the left pointer `i` only moves forward.
-
-Across the entire algorithm:
+At first, the code may look like `O(n²)` because there is a `while` loop inside a `for` loop.
 
 ```text
-j → moves at most n times
-i → moves at most n times
+for loop
+   ↓
+while loop
 ```
+
+But we **do not multiply them** here.
+
+The important point is that both pointers only move **forward**.
+
+### Right Pointer `j`
+
+The `for` loop moves `j` from:
+
+```text
+0 → 1 → 2 → 3 → ... → n-1
+```
+
+So `j` moves at most:
+
+```text
+n times
+```
+
+### Left Pointer `i`
+
+Inside the `while` loop, `i` is increased:
+
+```text
+i++
+```
+
+But `i` never moves backward.
+
+Therefore, during the **entire algorithm**, `i` can move from:
+
+```text
+0 → 1 → 2 → ... → n-1
+```
+
+at most:
+
+```text
+n times
+```
+
+It does NOT move `n` times for every value of `j`.
+
+Therefore, the total number of pointer movements is approximately:
+
+```text
+n + n
+= 2n
+```
+
+We ignore the constant `2` in Big-O notation:
+
+```text
+O(2n)
+= O(n)
+```
+
+### Therefore:
+
+```text
+Time Complexity = O(n)
+```
+
+---
+
+## Space Complexity — `O(1)`
+
+We only use a few variables:
+
+```text
+i
+j
+usedbit
+maxlength
+```
+
+No extra array, HashMap, or other data structure is used.
 
 Therefore:
 
 ```text
-O(n + n)
-= O(n)
+Space Complexity = O(1)
 ```
-
-### Space Complexity
-
-```text
-O(1)
-```
-
-Only a few variables are used.
 
 ---
 
-# 📌 Final Pattern
+## 🔑 Important Complexity Lesson
+
+> A nested loop does **not always mean `O(n²)`**.
+
+For this problem:
 
 ```text
-LC 2401
-   ↓
-Sliding Window
-   +
-Bit Manipulation
-   +
-Two Pointers
-   ↓
-O(n) Time
-O(1) Space
+for → j moves forward n times
+while → i moves forward n times in total
+```
+
+So:
+
+```text
+O(n + n) = O(n)
+```
+
+This is called **amortized analysis**.
+
+### Quick Comparison
+
+```text
+❌ If inner loop restarted n times for every j:
+   O(n × n) = O(n²)
+
+✅ Here, i keeps its position and only moves forward:
+   O(n + n) = O(n)
+```
+
+So the final complexity of LC 2401 is:
+
+```text
+Time  → O(n)
+Space → O(1)
 ```
