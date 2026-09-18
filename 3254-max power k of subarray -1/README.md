@@ -1,4 +1,5 @@
 # LeetCode 3254 — Find the Power of K-Size Subarrays I
+# LeetCode 3255 - Find the Power of K-Size Subarrays II
 
 ## Question
 
@@ -43,6 +44,7 @@ k = 3
 ## LeetCode Link
 
 https://leetcode.com/problems/find-the-power-of-k-size-subarrays-i/
+https://leetcode.com/problems/find-the-power-of-k-size-subarrays-ii/
 
 ## Approach — Sliding Window
 
