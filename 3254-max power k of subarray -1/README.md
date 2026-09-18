@@ -43,7 +43,7 @@ k = 3
 
 ## LeetCode Link
 
-https://leetcode.com/problems/find-the-power-of-k-size-subarrays-i/
+https://leetcode.com/problems/find-the-power-of-k-size-subarrays-i   /n
 https://leetcode.com/problems/find-the-power-of-k-size-subarrays-ii/
 
 ## Approach — Sliding Window
