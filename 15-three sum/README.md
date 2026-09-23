@@ -2,7 +2,7 @@
 
 ## LeetCode Problem
 
-[3Sum](https://leetcode.com/problems/3sum/)
+(https://leetcode.com/problems/3sum/)
 
 ---
 
@@ -260,14 +260,6 @@ Use Two Pointers
 Calculate 3 numbers
 ```
 
-Remember:
 
-```text
-sum < 0  → left++
-
-sum > 0  → right--
-
-sum == 0 → store triplet
-```
 
 And always **skip duplicates** to avoid duplicate triplets.
