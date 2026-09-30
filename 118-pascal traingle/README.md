@@ -1,8 +1,8 @@
 # Pascal's Triangle
 
-## LeetCode Problem
+## leetcode Problem  
 
-[Pascal's Triangle](https://leetcode.com/problems/pascals-triangle/)
+(https://leetcode.com/problems/pascals-triangle/)
 
 ---
 
